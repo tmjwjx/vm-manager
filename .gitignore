@@ -1,2 +1,1 @@
-/pve/configs/local.yaml
-/vm/configs/local.yaml
+/vm/internal/infrastructure/configs/local.yaml
