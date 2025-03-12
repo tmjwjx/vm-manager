@@ -1,0 +1,91 @@
+syntax = "proto3";
+
+package vm;
+
+option go_package = "./;vm";
+
+service VMManager {
+  rpc CreateVM (CreateVMReq) returns (CreateVMResp) {} // 创建VM
+  rpc DestroyVM (DestroyVMReq) returns (DestroyVMResp) {} // 销毁VM
+  rpc RenewVM (RenewVMReq) returns (RenewVMResp) {} // 续订VM
+  rpc PowerOnVM (PowerVMReq) returns (PowerVMResp) {} // 开机
+  rpc PowerOffVM (PowerVMReq) returns (PowerVMResp) {} // 关机
+  rpc GetVMStatus (VMStatusReq) returns (VMStatusResp) {} // 获取VM状态
+  rpc ListAllVMs (ListAllVMsReq) returns (ListVMsResp) {} // 获取所有VM列表
+}
+
+message CreateVMReq {
+  string user_email = 1; // 用户邮箱
+  string token = 2; // 用户token
+}
+
+message CreateVMResp {
+  string vm_id = 1;
+}
+
+message DestroyVMReq {
+  string vm_id = 1;
+  string user_email = 2;
+}
+
+message DestroyVMResp {
+  bool success = 1;
+}
+
+message RenewVMReq {
+  string vm_id = 1;
+  string user_email = 2;
+  int32 days = 3;
+}
+
+message RenewVMResp {
+  string new_expiry_date = 1;
+}
+
+message PowerVMReq {
+  string vm_id = 1;
+  string user_email = 2;
+}
+
+message PowerVMResp {
+  bool success = 1;
+}
+
+message VMStatusReq {
+  string vm_id = 1;
+  string user_email = 2;
+}
+
+message VMStatusResp {
+  string vm_id = 1;
+  string vm_name = 2;
+  string os_type = 3;
+  string os_version = 4;
+  int32 cpu_cores = 5;
+  double memory_gb = 6;
+  string power_state = 7;
+  string tools_status = 8;
+}
+
+message ListUserVMsReq {
+  string user_email = 1;
+}
+
+message ListAllVMsReq {
+  string admin_email = 1; // 验证管理员权限
+}
+
+message VMInfo {
+  string vm_id = 1;
+  string vm_name = 2;
+  string os_type = 3;
+  string os_version = 4;
+  int32 cpu_cores = 5;
+  double memory_gb = 6;
+  string power_state = 7;
+  string user_email = 8; // 所属用户
+}
+
+message ListVMsResp {
+  repeated VMInfo vms = 1;
+}
