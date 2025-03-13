@@ -2,30 +2,32 @@ package service
 
 import (
 	"context"
-	"vm/internal/infrastructure/pve"
+	"vm/internal/domain/virtualMachine/entity"
+	"vm/internal/infrastructure/globals"
 	pvm "vm/internal/interfaces/grpc/proto/vm"
 )
 
 type VMServer struct {
 	pvm.UnimplementedVMManagerServer
-	pveClient pve.IPVEClient
+	//pveClient entity.IPVEClient
 }
 
-func NewVMServer(pveClient pve.IPVEClient) *VMServer {
+func NewVMServer() *VMServer {
 	return &VMServer{
-		pveClient: pveClient,
+		//pveClient: pveClient,
 	}
 }
 
 func (s *VMServer) CreateVM(ctx context.Context, req *pvm.CreateVMReq) (*pvm.CreateVMResp, error) {
-
+	
 	// 使用PVEClient创建虚拟机
 	// 这里使用了一些默认配置，实际应用中可以从请求参数或配置中获取
-	vmId, err := s.pveClient.CreateVM()
+	pveClient := entity.NewPVEClient(globals.Conn)
+	vmId, err := pveClient.CreateVM()
 	if err != nil {
 		return nil, err
 	}
-
+	
 	return &pvm.CreateVMResp{
 		VmId: vmId,
 	}, nil
