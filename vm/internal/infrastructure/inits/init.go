@@ -1,6 +1,6 @@
-package init
+package inits
 
-func Init() {
+func init() {
 	ConfigInit()
 	DbInit()
 	TableInit()

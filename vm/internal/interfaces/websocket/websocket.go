@@ -35,5 +35,7 @@ func WS(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		log.Printf("收到消息: %s", message)
+		// 处理信息
+		
 	}
 }
