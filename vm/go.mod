@@ -6,6 +6,7 @@ require (
 	github.com/gorilla/websocket v1.5.3
 	github.com/jinzhu/gorm v1.9.16
 	github.com/spf13/viper v1.19.0
+	go.uber.org/zap v1.21.0
 	google.golang.org/grpc v1.71.0
 	google.golang.org/protobuf v1.36.5
 	gorm.io/driver/mysql v1.5.7

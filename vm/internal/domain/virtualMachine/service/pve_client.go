@@ -1,4 +1,4 @@
-package entity
+package service
 
 import (
 	"github.com/gorilla/websocket"
@@ -45,4 +45,5 @@ func (c *PVEClient) CreateVM() (string, error) {
 	//// 打印响应内容
 	//fmt.Println(string(body))
 	//return string(body), nil
+	return "", nil // 暂时返回空字符串
 }

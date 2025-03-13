@@ -6,15 +6,12 @@ import (
 	"net"
 	"net/http"
 	"vm/internal/application/service"
-	"vm/internal/infrastructure/init"
+	_ "vm/internal/infrastructure/inits"
 	pvm "vm/internal/interfaces/grpc/proto/vm"
 	ws "vm/internal/interfaces/websocket"
 )
 
 func main() {
-	
-	// 初始化配置
-	init.Init()
 	
 	// 启动grpc服务
 	go GRPCInit()
