@@ -4,7 +4,7 @@
 // - protoc             v6.30.0
 // source: vm.proto
 
-package vm
+package proto_vm
 
 import (
 	context "context"
@@ -19,13 +19,7 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	VMManager_CreateVM_FullMethodName    = "/vm.VMManager/CreateVM"
-	VMManager_DestroyVM_FullMethodName   = "/vm.VMManager/DestroyVM"
-	VMManager_RenewVM_FullMethodName     = "/vm.VMManager/RenewVM"
-	VMManager_PowerOnVM_FullMethodName   = "/vm.VMManager/PowerOnVM"
-	VMManager_PowerOffVM_FullMethodName  = "/vm.VMManager/PowerOffVM"
-	VMManager_GetVMStatus_FullMethodName = "/vm.VMManager/GetVMStatus"
-	VMManager_ListAllVMs_FullMethodName  = "/vm.VMManager/ListAllVMs"
+	VMManager_CreateVM_FullMethodName = "/proto_vm.VMManager/CreateVM"
 )
 
 // VMManagerClient is the client API for VMManager service.
@@ -33,12 +27,6 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type VMManagerClient interface {
 	CreateVM(ctx context.Context, in *CreateVMReq, opts ...grpc.CallOption) (*CreateVMResp, error)
-	DestroyVM(ctx context.Context, in *DestroyVMReq, opts ...grpc.CallOption) (*DestroyVMResp, error)
-	RenewVM(ctx context.Context, in *RenewVMReq, opts ...grpc.CallOption) (*RenewVMResp, error)
-	PowerOnVM(ctx context.Context, in *PowerVMReq, opts ...grpc.CallOption) (*PowerVMResp, error)
-	PowerOffVM(ctx context.Context, in *PowerVMReq, opts ...grpc.CallOption) (*PowerVMResp, error)
-	GetVMStatus(ctx context.Context, in *VMStatusReq, opts ...grpc.CallOption) (*VMStatusResp, error)
-	ListAllVMs(ctx context.Context, in *ListAllVMsReq, opts ...grpc.CallOption) (*ListVMsResp, error)
 }
 
 type vMManagerClient struct {
@@ -59,77 +47,11 @@ func (c *vMManagerClient) CreateVM(ctx context.Context, in *CreateVMReq, opts ..
 	return out, nil
 }
 
-func (c *vMManagerClient) DestroyVM(ctx context.Context, in *DestroyVMReq, opts ...grpc.CallOption) (*DestroyVMResp, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(DestroyVMResp)
-	err := c.cc.Invoke(ctx, VMManager_DestroyVM_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *vMManagerClient) RenewVM(ctx context.Context, in *RenewVMReq, opts ...grpc.CallOption) (*RenewVMResp, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(RenewVMResp)
-	err := c.cc.Invoke(ctx, VMManager_RenewVM_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *vMManagerClient) PowerOnVM(ctx context.Context, in *PowerVMReq, opts ...grpc.CallOption) (*PowerVMResp, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(PowerVMResp)
-	err := c.cc.Invoke(ctx, VMManager_PowerOnVM_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *vMManagerClient) PowerOffVM(ctx context.Context, in *PowerVMReq, opts ...grpc.CallOption) (*PowerVMResp, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(PowerVMResp)
-	err := c.cc.Invoke(ctx, VMManager_PowerOffVM_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *vMManagerClient) GetVMStatus(ctx context.Context, in *VMStatusReq, opts ...grpc.CallOption) (*VMStatusResp, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(VMStatusResp)
-	err := c.cc.Invoke(ctx, VMManager_GetVMStatus_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *vMManagerClient) ListAllVMs(ctx context.Context, in *ListAllVMsReq, opts ...grpc.CallOption) (*ListVMsResp, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ListVMsResp)
-	err := c.cc.Invoke(ctx, VMManager_ListAllVMs_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 // VMManagerServer is the server API for VMManager service.
 // All implementations must embed UnimplementedVMManagerServer
 // for forward compatibility.
 type VMManagerServer interface {
 	CreateVM(context.Context, *CreateVMReq) (*CreateVMResp, error)
-	DestroyVM(context.Context, *DestroyVMReq) (*DestroyVMResp, error)
-	RenewVM(context.Context, *RenewVMReq) (*RenewVMResp, error)
-	PowerOnVM(context.Context, *PowerVMReq) (*PowerVMResp, error)
-	PowerOffVM(context.Context, *PowerVMReq) (*PowerVMResp, error)
-	GetVMStatus(context.Context, *VMStatusReq) (*VMStatusResp, error)
-	ListAllVMs(context.Context, *ListAllVMsReq) (*ListVMsResp, error)
 	mustEmbedUnimplementedVMManagerServer()
 }
 
@@ -142,24 +64,6 @@ type UnimplementedVMManagerServer struct{}
 
 func (UnimplementedVMManagerServer) CreateVM(context.Context, *CreateVMReq) (*CreateVMResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateVM not implemented")
-}
-func (UnimplementedVMManagerServer) DestroyVM(context.Context, *DestroyVMReq) (*DestroyVMResp, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DestroyVM not implemented")
-}
-func (UnimplementedVMManagerServer) RenewVM(context.Context, *RenewVMReq) (*RenewVMResp, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method RenewVM not implemented")
-}
-func (UnimplementedVMManagerServer) PowerOnVM(context.Context, *PowerVMReq) (*PowerVMResp, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method PowerOnVM not implemented")
-}
-func (UnimplementedVMManagerServer) PowerOffVM(context.Context, *PowerVMReq) (*PowerVMResp, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method PowerOffVM not implemented")
-}
-func (UnimplementedVMManagerServer) GetVMStatus(context.Context, *VMStatusReq) (*VMStatusResp, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetVMStatus not implemented")
-}
-func (UnimplementedVMManagerServer) ListAllVMs(context.Context, *ListAllVMsReq) (*ListVMsResp, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ListAllVMs not implemented")
 }
 func (UnimplementedVMManagerServer) mustEmbedUnimplementedVMManagerServer() {}
 func (UnimplementedVMManagerServer) testEmbeddedByValue()                   {}
@@ -200,148 +104,16 @@ func _VMManager_CreateVM_Handler(srv interface{}, ctx context.Context, dec func(
 	return interceptor(ctx, in, info, handler)
 }
 
-func _VMManager_DestroyVM_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DestroyVMReq)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(VMManagerServer).DestroyVM(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: VMManager_DestroyVM_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(VMManagerServer).DestroyVM(ctx, req.(*DestroyVMReq))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _VMManager_RenewVM_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(RenewVMReq)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(VMManagerServer).RenewVM(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: VMManager_RenewVM_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(VMManagerServer).RenewVM(ctx, req.(*RenewVMReq))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _VMManager_PowerOnVM_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(PowerVMReq)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(VMManagerServer).PowerOnVM(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: VMManager_PowerOnVM_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(VMManagerServer).PowerOnVM(ctx, req.(*PowerVMReq))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _VMManager_PowerOffVM_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(PowerVMReq)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(VMManagerServer).PowerOffVM(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: VMManager_PowerOffVM_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(VMManagerServer).PowerOffVM(ctx, req.(*PowerVMReq))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _VMManager_GetVMStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(VMStatusReq)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(VMManagerServer).GetVMStatus(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: VMManager_GetVMStatus_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(VMManagerServer).GetVMStatus(ctx, req.(*VMStatusReq))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _VMManager_ListAllVMs_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListAllVMsReq)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(VMManagerServer).ListAllVMs(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: VMManager_ListAllVMs_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(VMManagerServer).ListAllVMs(ctx, req.(*ListAllVMsReq))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 // VMManager_ServiceDesc is the grpc.ServiceDesc for VMManager service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var VMManager_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "vm.VMManager",
+	ServiceName: "proto_vm.VMManager",
 	HandlerType: (*VMManagerServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
 			MethodName: "CreateVM",
 			Handler:    _VMManager_CreateVM_Handler,
-		},
-		{
-			MethodName: "DestroyVM",
-			Handler:    _VMManager_DestroyVM_Handler,
-		},
-		{
-			MethodName: "RenewVM",
-			Handler:    _VMManager_RenewVM_Handler,
-		},
-		{
-			MethodName: "PowerOnVM",
-			Handler:    _VMManager_PowerOnVM_Handler,
-		},
-		{
-			MethodName: "PowerOffVM",
-			Handler:    _VMManager_PowerOffVM_Handler,
-		},
-		{
-			MethodName: "GetVMStatus",
-			Handler:    _VMManager_GetVMStatus_Handler,
-		},
-		{
-			MethodName: "ListAllVMs",
-			Handler:    _VMManager_ListAllVMs_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
