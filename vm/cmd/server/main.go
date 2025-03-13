@@ -11,6 +11,7 @@ import (
 	"net"
 	"vm/internal/application/service"
 	"vm/internal/domain/virtualMachine/entity"
+	"vm/internal/infrastructure/pve"
 	pvm "vm/internal/interfaces/grpc/proto/vm"
 )
 
@@ -26,9 +27,16 @@ func main() {
 	if err != nil {
 		log.Printf("监听失败: %v", err)
 	}
+	// 初始化PVE客户端
+	pveClient := pve.NewPVEClient(
+		viper.GetString("pve.api_url"),
+		viper.GetString("pve.api_token"),
+		viper.GetString("pve.node_name"),
+	)
+
 	// 注册grpc服务
 	grpcServer := grpc.NewServer()
-	pvm.RegisterVMManagerServer(grpcServer, &service.VMServer{})
+	pvm.RegisterVMManagerServer(grpcServer, service.NewVMServer(pveClient))
 
 	// 启动服务
 	if err = grpcServer.Serve(listen); err != nil {

@@ -18,12 +18,14 @@ func main() {
 	// 建立连接
 	client := pvm.NewVMManagerClient(conn)
 
+	// 调用服务
 	resp, err := client.CreateVM(context.Background(), &pvm.CreateVMReq{
 		UserEmail: "123123",
 		Token:     "123123",
 	})
 	if err != nil {
 		log.Printf("调用失败: %v", err)
+	} else {
+		log.Printf("调用成功: %v", resp)
 	}
-	log.Printf("调用成功: %v", resp)
 }
