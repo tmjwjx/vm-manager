@@ -1,40 +1,41 @@
 package main
 
 import (
-	"github.com/gin-gonic/gin"
-	"pve/internal/controller"
+	"fmt"
+	"github.com/gorilla/websocket"
+	"log"
 )
 
-func main() {
-
-	router := gin.Default()
-
-	vmRouter := router.Group("/vm")
-	{
-		// 创建虚拟机(实际是使用复制模板的方式创建)
-		vmRouter.POST("/create", controller.CreateVM)
-
-		//// 删除虚拟机
-		//vmRouter.POST("/delete", deleteVM)
-
-		//// 启动虚拟机
-		//vmRouter.POST("/start", startVM)
-
-		//// 关闭虚拟机
-		//vmRouter.POST("/stop", stopVM)
-
-		//// 重启虚拟机
-		//vmRouter.POST("/restart", restartVM)
-
-		//// 获取虚拟机列表
-		//vmRouter.GET("/list", listVM)
-
-		//// 获取虚拟机详情
-		//vmRouter.GET("/detail", detailVM)
-
-		//// 获取虚拟机ip
-		//vmRouter.GET("/ip", getVMIP)
-	}
-
-	_ = router.Run(":8088")
+type WebsocketClient struct {
+	conn *websocket.Conn
 }
+
+func main() {
+	dl := websocket.Dialer{}
+	conn, _, err := dl.Dial("ws://127.0.0.1:8088", nil)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	wsc := WebsocketClient{conn: conn}
+	for {
+		m, p, e := wsc.conn.ReadMessage()
+		if e != nil {
+			break
+		}
+		fmt.Println(m, string(p))
+	}
+}
+
+//func main() {
+//
+//	router := gin.Default()
+//
+//	vmRouter := router.Group("/vm")
+//	{
+//		// 创建虚拟机(实际是使用复制模板的方式创建)
+//		vmRouter.POST("/create", controller.CreateVM)
+//	}
+//
+//	_ = router.Run(":8088")
+//}
