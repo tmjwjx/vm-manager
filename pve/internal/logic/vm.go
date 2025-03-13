@@ -1,6 +1,7 @@
 package logic
 
 import (
+	"crypto/tls"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -11,9 +12,15 @@ func CreateVM() {
 	url := "http://192.168.10.2:8006/api2/json/nodes/lezhi/qemu/112/clone"
 	method := "POST"
 
-	payload := strings.NewReader("newid=111&name=tianjiajie")
+	payload := strings.NewReader("newid=123&name=tianjiajie")
 
-	client := &http.Client{}
+	// 跳过证书验证（仅限测试环境）
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{
+			InsecureSkipVerify: true, // 跳过证书验证
+		},
+	}
+	client := &http.Client{Transport: tr}
 	req, err := http.NewRequest(method, url, payload)
 
 	if err != nil {
@@ -21,16 +28,11 @@ func CreateVM() {
 		return
 	}
 	req.Header.Add("Authorization", "PVEAPIToken=root@pam!vmManager=613102db-dc90-41f4-960c-4754d05096b8")
-	req.Header.Add("User-Agent", "Apifox/1.0.0 (https://apifox.com)")
-	req.Header.Add("Accept", "*/*")
-	req.Header.Add("Host", "192.168.10.2:8006")
-	req.Header.Add("Connection", "keep-alive")
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
-	req.Header.Add("Referer", "http://192.168.10.2:8006/api2/json/nodes/lezhi/qemu/112/clone")
 
 	res, err := client.Do(req)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Printf("pve接口连接失败: %v\n", err)
 		return
 	}
 	defer res.Body.Close()

@@ -2,8 +2,8 @@ package service
 
 import (
 	"context"
-	pvm "vm/internal/interfaces/grpc/proto/vm"
 	"vm/internal/infrastructure/pve"
+	pvm "vm/internal/interfaces/grpc/proto/vm"
 )
 
 type VMServer struct {
@@ -18,9 +18,10 @@ func NewVMServer(pveClient pve.IPVEClient) *VMServer {
 }
 
 func (s *VMServer) CreateVM(ctx context.Context, req *pvm.CreateVMReq) (*pvm.CreateVMResp, error) {
+
 	// 使用PVEClient创建虚拟机
 	// 这里使用了一些默认配置，实际应用中可以从请求参数或配置中获取
-	vmId, err := s.pveClient.CreateVM(2, 4.0, "linux", "ubuntu-20.04")
+	vmId, err := s.pveClient.CreateVM()
 	if err != nil {
 		return nil, err
 	}

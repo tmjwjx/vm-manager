@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/gorilla/websocket"
 	"github.com/spf13/viper"
 	"google.golang.org/grpc"
 	"gorm.io/driver/mysql"
@@ -9,11 +10,43 @@ import (
 	"gorm.io/gorm/schema"
 	"log"
 	"net"
+	"net/http"
 	"vm/internal/application/service"
 	"vm/internal/domain/virtualMachine/entity"
 	"vm/internal/infrastructure/pve"
 	pvm "vm/internal/interfaces/grpc/proto/vm"
 )
+
+type WebsocketServer struct {
+	conn *websocket.Conn
+}
+
+var wss WebsocketServer
+
+var UP = websocket.Upgrader{
+	ReadBufferSize:  1024,
+	WriteBufferSize: 1024,
+}
+
+func handler(w http.ResponseWriter, r *http.Request) {
+	conn, err := UP.Upgrade(w, r, nil)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	wss.conn = conn
+	for {
+		m, p, err := conn.ReadMessage() // m 为消息类型，p 为消息内容，err 为错误
+		if err != nil {
+			break
+		}
+		_ = wss.conn.WriteMessage(websocket.TextMessage, []byte("客户端发送消息:"+string(p)))
+
+		fmt.Println(m, string(p))
+	}
+	defer conn.Close()
+	log.Println("websocket服务关闭")
+}
 
 func main() {
 
@@ -22,6 +55,19 @@ func main() {
 	db := dbInit()
 	tableInit(db)
 
+	// 启动websocket服务
+	go WebSocketInit()
+
+	// 启动grpc服务
+	GRPCInit()
+}
+
+func WebSocketInit() {
+	http.HandleFunc("/", handler)
+	_ = http.ListenAndServe(":8088", nil)
+}
+
+func GRPCInit() {
 	// 开启端口监听
 	listen, err := net.Listen("tcp", ":8888")
 	if err != nil {
