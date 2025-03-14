@@ -22,7 +22,7 @@ func (wsc *WebsocketClient) ServerPve(messageType int, p []byte) {
 	case globals.CreateType:
 		// 创建虚拟机
 		controller.CreateVM(data.Data)
-	case globals.DeleteType:
+	case globals.DestroyType:
 
 	}
 }
