@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/metadata"
 	"log"
 	pvm "vm/internal/interfaces/grpc/proto/vm"
 )
@@ -14,15 +15,15 @@ func main() {
 		log.Printf("连接失败: %v", err)
 	}
 	defer conn.Close()
-
+	
+	// 创建一个包含元数据的context
+	ctx := metadata.NewOutgoingContext(context.Background(), metadata.Pairs("Authorization", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MzIsImVtYWlsIjoiMjkzNzY5MzkxOUBxcS5jb20iLCJpc3MiOiJzaXd1LXdlYi1zZXJ2aWNlIiwiZXhwIjoxNzQyMjU3OTU2LCJpYXQiOjE3NDE5NTU1NTZ9.tfX6T_Wa-dhYmK4ZvP5PGr8H8aUH4fMsTQD04VSJYVs"))
+	
 	// 建立连接
 	client := pvm.NewVMManagerClient(conn)
-
+	
 	// 调用服务
-	resp, err := client.CreateVM(context.Background(), &pvm.CreateVMReq{
-		UserEmail: "2937693919@qq.com",
-		Token:     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MzIsImVtYWlsIjoiMjkzNzY5MzkxOUBxcS5jb20iLCJpc3MiOiJzaXd1LXdlYi1zZXJ2aWNlIiwiZXhwIjoxNzQyMjU3OTU2LCJpYXQiOjE3NDE5NTU1NTZ9.tfX6T_Wa-dhYmK4ZvP5PGr8H8aUH4fMsTQD04VSJYVs",
-	})
+	resp, err := client.CreateVM(ctx, &pvm.CreateVMReq{})
 	if err != nil {
 		log.Printf("调用失败: %v", err)
 	} else {

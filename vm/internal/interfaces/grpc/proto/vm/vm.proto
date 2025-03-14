@@ -11,12 +11,10 @@ service VMManager {
 }
 
 message CreateVMReq {
-  string user_email = 1; // 用户邮箱
-  string token = 2; // 用户token
 }
 
 message CreateVMResp {
-  string vm_id = 1;
+  bool result = 1;
 }
 
 message DestroyVMReq {
