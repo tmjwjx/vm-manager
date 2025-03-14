@@ -5,8 +5,6 @@ import (
 	"log"
 	"net"
 	"vm/internal/application/service"
-	"vm/internal/infrastructure/globals"
-	"vm/internal/interfaces/grpc/interceptor"
 	vmProto "vm/internal/interfaces/grpc/proto/vm"
 )
 
@@ -19,7 +17,8 @@ func GRPCRun() {
 
 	// 注册grpc服务
 	// 注册 JWT 拦截器
-	grpcServer := grpc.NewServer(grpc.ChainUnaryInterceptor(interceptor.JWTInterceptor(globals.RDB)))
+	//grpcServer := grpc.NewServer(grpc.ChainUnaryInterceptor(interceptor.JWTInterceptor(globals.RDB)))
+	grpcServer := grpc.NewServer()
 
 	vmProto.RegisterVMManagerServer(grpcServer, service.NewVMServer())
 

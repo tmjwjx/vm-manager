@@ -20,8 +20,8 @@ func main() {
 
 	// 调用服务
 	resp, err := client.CreateVM(context.Background(), &pvm.CreateVMReq{
-		UserEmail: "123123",
-		Token:     "123123",
+		UserEmail: "2937693919@qq.com",
+		Token:     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MzIsImVtYWlsIjoiMjkzNzY5MzkxOUBxcS5jb20iLCJpc3MiOiJzaXd1LXdlYi1zZXJ2aWNlIiwiZXhwIjoxNzQyMjU3OTU2LCJpYXQiOjE3NDE5NTU1NTZ9.tfX6T_Wa-dhYmK4ZvP5PGr8H8aUH4fMsTQD04VSJYVs",
 	})
 	if err != nil {
 		log.Printf("调用失败: %v", err)
