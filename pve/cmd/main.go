@@ -25,7 +25,6 @@ func (wsc *WebsocketClient) ServerPve(messageType int, p []byte) {
 	case globals.DeleteType:
 
 	}
-
 }
 
 func main() {
@@ -44,16 +43,3 @@ func main() {
 		wsc.ServerPve(m, p)
 	}
 }
-
-//func main() {
-//
-//	router := gin.Default()
-//
-//	vmRouter := router.Group("/vm")
-//	{
-//		// 创建虚拟机(实际是使用复制模板的方式创建)
-//		vmRouter.POST("/create", controller.CreateVM)
-//	}
-//
-//	_ = router.Run(":8088")
-//}
