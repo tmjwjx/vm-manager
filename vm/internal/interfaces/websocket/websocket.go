@@ -7,16 +7,6 @@ import (
 	"vm/internal/infrastructure/globals"
 )
 
-type Data struct {
-	Type string `json:"type"`
-	Data []byte `json:"data"`
-}
-
-const (
-	CreateType = 1
-	DeleteType = 2
-)
-
 func WS(w http.ResponseWriter, r *http.Request) {
 	var up = websocket.Upgrader{
 		ReadBufferSize:  1024,
@@ -36,6 +26,6 @@ func WS(w http.ResponseWriter, r *http.Request) {
 		}
 		log.Printf("收到消息: %s", message)
 		// 处理信息
-		
+
 	}
 }
