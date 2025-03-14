@@ -11,7 +11,8 @@ func ServerPVE(mes []byte) {
 	switch data.Type {
 	case globals.CreateType:
 		// 创建虚拟机
-	case globals.DeleteType:
+	case globals.DestroyType:
 		// 删除虚拟机
+
 	}
 }
