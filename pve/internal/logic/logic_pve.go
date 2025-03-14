@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-func CreateVM() {
+func CreateVM(data []byte) {
 	url := "http://192.168.10.2:8006/api2/json/nodes/lezhi/qemu/112/clone"
 	method := "POST"
 

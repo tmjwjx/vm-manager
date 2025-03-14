@@ -2,13 +2,12 @@ package controller
 
 import (
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"pve/internal/logic"
 )
 
-func CreateVM(c *gin.Context) {
+func CreateVM(data []byte) {
 
 	fmt.Println("create vm")
-	logic.CreateVM()
+	logic.CreateVM(data)
 
 }
