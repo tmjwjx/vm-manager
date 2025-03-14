@@ -18,3 +18,10 @@ message CreateVMReq {
 message CreateVMResp {
   string vm_id = 1;
 }
+
+message DestroyVMReq {
+}
+
+message DestroyVMResp {
+  bool result = 1;
+}
