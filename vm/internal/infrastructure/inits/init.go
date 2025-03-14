@@ -5,4 +5,5 @@ func init() {
 	LogInit()
 	DbInit()
 	TableInit()
+	RedisInit()
 }
