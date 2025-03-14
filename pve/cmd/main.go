@@ -1,13 +1,31 @@
 package main
 
 import (
-	"fmt"
+	"encoding/json"
 	"github.com/gorilla/websocket"
 	"log"
+	"pve/internal/controller"
+	"pve/pkg/globals"
 )
 
 type WebsocketClient struct {
 	conn *websocket.Conn
+}
+
+func (wsc *WebsocketClient) ServerPve(messageType int, p []byte) {
+	data := globals.Data{}
+	err := json.Unmarshal(p, &data)
+	if err != nil {
+		return
+	}
+	switch data.Type {
+	case globals.CreateType:
+		// 创建虚拟机
+		controller.CreateVM(data.Data)
+	case globals.DeleteType:
+
+	}
+
 }
 
 func main() {
@@ -19,11 +37,11 @@ func main() {
 	}
 	wsc := WebsocketClient{conn: conn}
 	for {
-		m, p, e := wsc.conn.ReadMessage()
-		if e != nil {
+		m, p, err := wsc.conn.ReadMessage()
+		if err != nil {
 			break
 		}
-		fmt.Println(m, string(p))
+		wsc.ServerPve(m, p)
 	}
 }
 

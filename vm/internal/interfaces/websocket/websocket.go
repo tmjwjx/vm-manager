@@ -4,6 +4,7 @@ import (
 	"github.com/gorilla/websocket"
 	"log"
 	"net/http"
+	"vm/internal/application/service"
 	"vm/internal/infrastructure/globals"
 )
 
@@ -26,6 +27,7 @@ func WS(w http.ResponseWriter, r *http.Request) {
 		}
 		log.Printf("收到消息: %s", message)
 		// 处理信息
+		service.ServerPVE(message)
 
 	}
 }

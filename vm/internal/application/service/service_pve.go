@@ -2,25 +2,16 @@ package service
 
 import (
 	"encoding/json"
-)
-
-type Data struct {
-	Type string `json:"type"`
-	Data []byte `json:"data"`
-}
-
-const (
-	CreateType = "create"
-	DeleteType = "delete"
+	"vm/internal/infrastructure/globals"
 )
 
 func ServerPVE(mes []byte) {
-	var data Data
+	var data globals.Data
 	_ = json.Unmarshal(mes, &data)
 	switch data.Type {
-	case CreateType:
+	case globals.CreateType:
 		// 创建虚拟机
-	case DeleteType:
+	case globals.DeleteType:
 		// 删除虚拟机
 	}
 }
