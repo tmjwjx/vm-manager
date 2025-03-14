@@ -24,11 +24,6 @@ func NewPVEClient(conn *websocket.Conn) *PVEClient {
 	return &PVEClient{conn: conn}
 }
 
-type PVEReq struct {
-	VMID string `json:"vmid"`
-	Name string `json:"name"`
-}
-
 // CreateVM 实现创建虚拟机
 func (c *PVEClient) CreateVM(req *pvm.CreateVMReq) error {
 
@@ -54,17 +49,21 @@ func (c *PVEClient) CreateVM(req *pvm.CreateVMReq) error {
 	//fmt.Println(string(body))
 	//return string(body), nil
 
-	//mes := PVEReq{
-	//	VMID: req
-	//	Name: req.Name,
-	//}
+	// 构造请求消息
+	type PVECreateReq struct {
+		Email string `json:"email"`
+	}
+	mes := PVECreateReq{
+		Email: req.UserEmail,
+	}
+	b, err := json.Marshal(mes)
 
 	// 发送创建虚拟机请求
 	data := globals.Data{
 		Type: globals.CreateType,
-		Data: nil,
+		Data: b,
 	}
-	b, err := json.Marshal(data)
+	b, err = json.Marshal(data)
 	if err != nil {
 		return err
 	}

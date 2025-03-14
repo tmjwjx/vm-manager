@@ -1,6 +1,8 @@
 syntax = "proto3";
 
 package proto_vm;
+// protoc --go_out=. vm.proto
+// protoc --go-grpc_out=. vm.proto
 
 option go_package = "./;proto_vm";
 
