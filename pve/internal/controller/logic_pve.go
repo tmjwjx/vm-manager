@@ -11,3 +11,10 @@ func CreateVM(data []byte) {
 	logic.CreateVM(data)
 
 }
+
+func DestroyVM(data []byte) {
+
+	fmt.Println("Destroy vm")
+	logic.DestroyVM(data)
+
+}

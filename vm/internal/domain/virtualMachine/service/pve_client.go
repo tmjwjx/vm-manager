@@ -55,7 +55,18 @@ func (c *PVEClient) CreateVM(ctx context.Context, req *pvm.CreateVMReq) error {
 }
 
 // DestroyVM 销毁虚拟机
-func (c *PVEClient) DestroyVM(req *pvm.DestroyVMReq) error {
+func (c *PVEClient) DestroyVM(ctx context.Context, req *pvm.DestroyVMReq) error {
+
+	// 发送创建虚拟机请求
+	data := globals.Data{
+		Type: globals.DestroyType,
+		Data: []byte("114"), // 假设销毁 114
+	}
+	b, err := json.Marshal(data)
+	if err != nil {
+		return err
+	}
+	_ = c.conn.WriteMessage(websocket.TextMessage, b)
 
 	return nil
 }

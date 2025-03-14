@@ -8,6 +8,7 @@ option go_package = "./;proto_vm";
 
 service VMManager {
   rpc CreateVM (CreateVMReq) returns (CreateVMResp) {} // 创建VM
+  rpc DestroyVM(DestroyVMReq) returns (DestroyVMResp) {} // 销毁VM
 }
 
 message CreateVMReq {
