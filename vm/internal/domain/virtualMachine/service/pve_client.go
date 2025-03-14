@@ -27,19 +27,19 @@ func NewPVEClient(conn *websocket.Conn) *PVEClient {
 
 // CreateVM 实现创建虚拟机
 func (c *PVEClient) CreateVM(ctx context.Context, req *pvm.CreateVMReq) error {
-	
+
 	// 构造请求消息
 	type PVECreateReq struct {
 		Email string `json:"email"`
 	}
-	
+
 	email := ctx.Value("email")
-	
+
 	mes := PVECreateReq{
 		Email: email.(string),
 	}
 	b, err := json.Marshal(mes)
-	
+
 	// 发送创建虚拟机请求
 	data := globals.Data{
 		Type: globals.CreateType,
@@ -50,6 +50,12 @@ func (c *PVEClient) CreateVM(ctx context.Context, req *pvm.CreateVMReq) error {
 		return err
 	}
 	_ = c.conn.WriteMessage(websocket.TextMessage, b)
-	
+
 	return nil // 暂时返回空字符串
+}
+
+// DestroyVM 销毁虚拟机
+func (c *PVEClient) DestroyVM(req *pvm.DestroyVMReq) error {
+
+	return nil
 }

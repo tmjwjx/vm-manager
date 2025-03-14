@@ -6,6 +6,8 @@ import (
 
 // IVirtualMachineRepository 虚拟机仓储接口
 type IVirtualMachineRepository interface {
-	// Create 创建虚拟机
-	Create(vm *entity.VirtualMachine) error
+	// CreateVM 创建虚拟机
+	CreateVM(vm *entity.VirtualMachine) error
+	// DestroyVM 销毁虚拟机
+	DestroyVM(vm *entity.VirtualMachine) error
 }
