@@ -1,11 +1,13 @@
-package runs
+package grpc
 
 import (
 	"google.golang.org/grpc"
 	"log"
 	"net"
 	"vm/internal/application/service"
-	pvm "vm/internal/interfaces/grpc/proto/vm"
+	"vm/internal/infrastructure/globals"
+	"vm/internal/interfaces/grpc/interceptor"
+	vmProto "vm/internal/interfaces/grpc/proto/vm"
 )
 
 func GRPCRun() {
@@ -16,8 +18,10 @@ func GRPCRun() {
 	}
 
 	// 注册grpc服务
-	grpcServer := grpc.NewServer()
-	pvm.RegisterVMManagerServer(grpcServer, service.NewVMServer())
+	// 注册 JWT 拦截器
+	grpcServer := grpc.NewServer(grpc.ChainUnaryInterceptor(interceptor.JWTInterceptor(globals.RDB)))
+
+	vmProto.RegisterVMManagerServer(grpcServer, service.NewVMServer())
 
 	// 启动服务
 	if err = grpcServer.Serve(listen); err != nil {

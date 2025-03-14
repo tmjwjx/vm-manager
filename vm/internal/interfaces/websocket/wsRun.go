@@ -1,11 +1,10 @@
-package runs
+package websocket
 
 import (
 	"net/http"
-	ws "vm/internal/interfaces/websocket"
 )
 
 func WebSocketRun() {
-	http.HandleFunc("/", ws.WS)
+	http.HandleFunc("/", WS)
 	_ = http.ListenAndServe(":8088", nil)
 }
