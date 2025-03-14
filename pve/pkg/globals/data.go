@@ -6,6 +6,6 @@ type Data struct {
 }
 
 const (
-	CreateType = "create"
-	DeleteType = "delete"
+	CreateType  = "create"
+	DestroyType = "destroy"
 )

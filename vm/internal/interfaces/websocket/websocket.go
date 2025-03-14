@@ -28,6 +28,5 @@ func WS(w http.ResponseWriter, r *http.Request) {
 		log.Printf("收到消息: %s", message)
 		// 处理信息
 		service.ServerPVE(message)
-
 	}
 }
