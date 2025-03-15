@@ -10,8 +10,8 @@ import (
 	"strings"
 )
 
-func CreateVM(data []byte) {
-	vmid := GetMinID()
+func CreateVM() (vmid string, err error) {
+	vmid = GetMinID()
 	
 	url := globals.PVEURL + "/api2/json/nodes/lezhi/qemu/112/clone"
 	method := "POST"
@@ -101,31 +101,31 @@ func GetMinID() string {
 func DestroyVM(data []byte) {
 	url := globals.PVEURL + "/api2/json/nodes/lezhi/qemu/" + string(data)
 	method := "DELETE"
-
+	
 	// 跳过证书验证（仅限测试环境）
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{
 			InsecureSkipVerify: true, // 跳过证书验证
 		},
 	}
-
+	
 	client := &http.Client{Transport: tr}
 	req, err := http.NewRequest(method, url, nil)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-
+	
 	req.Header.Add("Authorization", "PVEAPIToken=root@pam!vmManager=613102db-dc90-41f4-960c-4754d05096b8")
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
-
+	
 	res, err := client.Do(req)
 	if err != nil {
 		fmt.Printf("pve接口连接失败: %v\n", err)
 		return
 	}
 	defer res.Body.Close()
-
+	
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		fmt.Println(err)

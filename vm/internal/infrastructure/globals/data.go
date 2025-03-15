@@ -1,11 +1,13 @@
 package globals
 
 type Data struct {
-	Type string `json:"type"`
-	Data []byte `json:"data"`
+	Type DataType `json:"type"`
+	Data []byte   `json:"data"`
 }
 
+type DataType string
+
 const (
-	CreateType  = "create"
-	DestroyType = "destroy"
+	CreateType  DataType = "create"
+	DestroyType DataType = "destroy"
 )

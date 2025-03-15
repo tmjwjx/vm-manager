@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/gorilla/websocket"
-	"log"
 	"vm/internal/infrastructure/globals"
 	pvm "vm/internal/interfaces/grpc/proto/vm"
 )
@@ -57,7 +56,7 @@ func (c *PVEClient) CreateVM(ctx context.Context, req *pvm.CreateVMReq) error {
 
 // DestroyVM 销毁虚拟机
 func (c *PVEClient) DestroyVM(ctx context.Context, req *pvm.DestroyVMReq) error {
-
+	
 	// 发送创建虚拟机请求
 	data := globals.Data{
 		Type: globals.DestroyType,
@@ -68,6 +67,6 @@ func (c *PVEClient) DestroyVM(ctx context.Context, req *pvm.DestroyVMReq) error 
 		return err
 	}
 	_ = c.conn.WriteMessage(websocket.TextMessage, b)
-
+	
 	return nil
 }
