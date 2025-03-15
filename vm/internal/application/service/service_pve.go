@@ -21,5 +21,6 @@ func ServerPVE(mes []byte) {
 		// 执行持久化操作
 	case globals.DestroyType:
 		// 删除虚拟机
+
 	}
 }

@@ -35,7 +35,6 @@ func (c *PVEClient) CreateVM(ctx context.Context, req *pvm.CreateVMReq) error {
 	}
 	
 	email := ctx.Value("email")
-	log.Printf("email: %v", email)
 	
 	mes := PVECreateReq{
 		Email: email.(string),
@@ -54,4 +53,21 @@ func (c *PVEClient) CreateVM(ctx context.Context, req *pvm.CreateVMReq) error {
 	_ = c.conn.WriteMessage(websocket.TextMessage, b)
 	
 	return nil // 暂时返回空字符串
+}
+
+// DestroyVM 销毁虚拟机
+func (c *PVEClient) DestroyVM(ctx context.Context, req *pvm.DestroyVMReq) error {
+
+	// 发送创建虚拟机请求
+	data := globals.Data{
+		Type: globals.DestroyType,
+		Data: []byte("114"), // 假设销毁 114
+	}
+	b, err := json.Marshal(data)
+	if err != nil {
+		return err
+	}
+	_ = c.conn.WriteMessage(websocket.TextMessage, b)
+
+	return nil
 }
