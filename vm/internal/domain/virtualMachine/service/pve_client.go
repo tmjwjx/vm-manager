@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/gorilla/websocket"
+	"log"
 	"vm/internal/infrastructure/globals"
 	pvm "vm/internal/interfaces/grpc/proto/vm"
 )
@@ -34,6 +35,7 @@ func (c *PVEClient) CreateVM(ctx context.Context, req *pvm.CreateVMReq) error {
 	}
 	
 	email := ctx.Value("email")
+	log.Printf("email: %v", email)
 	
 	mes := PVECreateReq{
 		Email: email.(string),

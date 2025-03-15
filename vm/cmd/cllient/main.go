@@ -17,7 +17,7 @@ func main() {
 	defer conn.Close()
 	
 	// 创建一个包含元数据的context
-	ctx := metadata.NewOutgoingContext(context.Background(), metadata.Pairs("Authorization", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MzIsImVtYWlsIjoiMjkzNzY5MzkxOUBxcS5jb20iLCJpc3MiOiJzaXd1LXdlYi1zZXJ2aWNlIiwiZXhwIjoxNzQyMjU3OTU2LCJpYXQiOjE3NDE5NTU1NTZ9.tfX6T_Wa-dhYmK4ZvP5PGr8H8aUH4fMsTQD04VSJYVs"))
+	ctx := metadata.NewOutgoingContext(context.Background(), metadata.Pairs("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MzIsImVtYWlsIjoiMjkzNzY5MzkxOUBxcS5jb20iLCJpc3MiOiJzaXd1LXdlYi1zZXJ2aWNlIiwiZXhwIjoxNzQyMjU3OTU2LCJpYXQiOjE3NDE5NTU1NTZ9.tfX6T_Wa-dhYmK4ZvP5PGr8H8aUH4fMsTQD04VSJYVs"))
 	
 	// 建立连接
 	client := pvm.NewVMManagerClient(conn)

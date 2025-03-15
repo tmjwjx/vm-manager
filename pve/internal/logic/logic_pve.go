@@ -10,8 +10,8 @@ import (
 	"strings"
 )
 
-func CreateVM(data []byte) {
-	vmid := GetMinID()
+func CreateVM(data []byte) (vmid string, err error) {
+	vmid = GetMinID()
 	
 	url := globals.PVEURL + "/api2/json/nodes/lezhi/qemu/112/clone"
 	method := "POST"
@@ -44,12 +44,13 @@ func CreateVM(data []byte) {
 	}
 	defer res.Body.Close()
 	
-	body, err := ioutil.ReadAll(res.Body)
+	_, err = ioutil.ReadAll(res.Body)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	fmt.Println(string(body))
+	
+	return
 }
 
 func GetMinID() string {
