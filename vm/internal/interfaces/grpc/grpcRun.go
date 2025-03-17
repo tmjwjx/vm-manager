@@ -1,13 +1,13 @@
 package grpc
 
 import (
+	vmProto "github.com/world-fish/proto/vm"
 	"google.golang.org/grpc"
 	"log"
 	"net"
 	"vm/internal/application/service"
 	"vm/internal/infrastructure/globals"
 	"vm/internal/interfaces/grpc/interceptor"
-	vmProto "vm/internal/interfaces/grpc/proto/vm"
 )
 
 func GRPCRun() {

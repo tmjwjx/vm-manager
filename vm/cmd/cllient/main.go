@@ -2,10 +2,10 @@ package main
 
 import (
 	"context"
+	pvm "github.com/world-fish/proto/vm"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
 	"log"
-	pvm "vm/internal/interfaces/grpc/proto/vm"
 )
 
 func main() {

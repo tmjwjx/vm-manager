@@ -20,7 +20,7 @@ func CreateVM() (vmid string, err error) {
 	t := "newid=" + vmid + "&name=lezhi-" + vmid
 	payload := strings.NewReader(t)
 	
-	// 跳过证书验证（仅限测试环境）
+	// 跳过证书验证(小组服务器好像没有证书)
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{
 			InsecureSkipVerify: true, // 跳过证书验证
