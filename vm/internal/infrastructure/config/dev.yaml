@@ -19,6 +19,6 @@ redis:
   max_retries: 3         # 最大重试次数
 
 log:
-  level: "debug"
+  level: -1  # -1: debug, 0: info, 1: warn, 2: error, 3: d_panic, 4: panic, 5: fatal
   logPath: "logs"
   appName: "vm"

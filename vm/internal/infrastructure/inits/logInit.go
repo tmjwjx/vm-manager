@@ -12,8 +12,9 @@ import (
 )
 
 func LogInit() {
+	// 读取配置文件
 	type LogConfig struct {
-		Level   string `yaml:"level"`
+		Level   int8   `yaml:"level"`
 		LogPath string `yaml:"logPath"`
 		AppName string `yaml:"appName"`
 	}
@@ -21,8 +22,7 @@ func LogInit() {
 	if err := viper.UnmarshalKey("log", &config); err != nil {
 		globals.Log.Panicf("无法解码为结构: %s", err)
 	}
-
-	//level := viper.GetString("level")
+	level := config.Level
 	logPath := config.LogPath
 	appName := config.AppName
 
@@ -30,22 +30,22 @@ func LogInit() {
 	encoder := GetEncoder()
 
 	// 将日志输出到控制台
-	consoleCore := zapcore.NewCore(encoder, zapcore.AddSync(os.Stdout), zapcore.DebugLevel)
-
+	consoleCore := zapcore.NewCore(encoder, zapcore.AddSync(os.Stdout), zapcore.Level(level))
 	// 将日志输出到文件
-	fileCore := zapcore.NewCore(encoder, writeSyncer, zapcore.DebugLevel)
+	fileCore := zapcore.NewCore(encoder, writeSyncer, zapcore.Level(level))
 
 	// 合并控制台输出和文件输出
 	core := zapcore.NewTee(consoleCore, fileCore)
-	//// 只输出到文件
+	// 只输出到文件
 	//core := zapcore.NewTee(fileCore)
 
+	// 构建logger
 	logger := zap.New(core, zap.AddCaller())
 
-	// 配置默认的log
+	// 替换全局zap
+	zap.ReplaceGlobals(logger)
+	// 替换全局log
 	log.SetOutput(zap.NewStdLog(logger).Writer())
-
-	globals.Log = logger.Sugar()
 }
 
 func GetEncoder() zapcore.Encoder {

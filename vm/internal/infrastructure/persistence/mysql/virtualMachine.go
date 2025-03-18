@@ -2,43 +2,35 @@ package mysql
 
 import (
 	"gorm.io/gorm"
-	"time"
 	"vm/internal/domain/virtualMachine/entity"
 )
 
-type VmRepo struct {
-	db *gorm.DB
+type VMRepo struct {
+	DB *gorm.DB
 }
 
-func NewVmRepo(db *gorm.DB) *VmRepo {
-	return &VmRepo{db: db}
+func NewVmRepo(DB *gorm.DB) *VMRepo {
+	return &VMRepo{DB: DB}
 }
 
-func (vmRepo *VmRepo) CreateVM(vm *entity.VirtualMachine) (err error) {
-	// 开启事务
-	tx := vmRepo.db.Begin()
-	if tx.Error != nil {
-		tx.Rollback()
-		return tx.Error
-	}
+func (vmRepo *VMRepo) CreateVM(vm *entity.VirtualMachine) error {
+	//TODO implement me
+	panic("implement me")
+}
 
-	// 设置过期时间
-	end := time.Now().Add(time.Hour * 24 * 30)
-	vm.ExpirationTime = &end
+func (vmRepo *VMRepo) DestroyVM(vm *entity.VirtualMachine) error {
+	//TODO implement me
+	panic("implement me")
+}
 
-	// 存储虚拟机信息
-	if err = tx.Create(vm).Error; err != nil {
-		tx.Rollback()
-		return
-	}
+func (vmRepo *VMRepo) RenewVM(vm *entity.VirtualMachine) error {
+	//TODO implement me
+	panic("implement me")
+}
 
-	// 提交事务
-	if err = tx.Commit().Error; err != nil {
-		tx.Rollback()
-		return
-	}
-
-	return nil
+func (vmRepo *VMRepo) GetVMInfo(vm *entity.VirtualMachine) error {
+	//TODO implement me
+	panic("implement me")
 }
 
 // VerifyEmail
@@ -47,23 +39,17 @@ func (vmRepo *VmRepo) CreateVM(vm *entity.VirtualMachine) (err error) {
 // @param        email string
 // @return       err
 // @Author tianjiajie 2025-03-16 16:41:42
-func (vmRepo *VmRepo) VerifyEmail(email string) (b bool, err error) {
-
+func (vmRepo *VMRepo) VerifyEmail(email string) (b bool) {
 	// 查询邮箱是否存在
 	var user entity.VirtualMachine
-	if err = vmRepo.db.Where("email = ?", email).First(&user).Error; err != nil {
-		vmRepo.db.Rollback()
+	if err := vmRepo.DB.Where("email = ?", email).First(&user).Error; err != nil {
+		vmRepo.DB.Rollback()
 		return
 	}
+	// 判断是否存在
 	if user.ID == 0 {
-		return false, nil
+		return false
 	} else {
-		return true, nil
+		return true
 	}
-}
-
-// DestroyVM 销毁虚拟机
-func (vmRepo *VmRepo) DestroyVM(vm *entity.VirtualMachine) (err error) {
-
-	return nil
 }

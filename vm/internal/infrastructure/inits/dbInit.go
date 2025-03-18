@@ -7,10 +7,10 @@ import (
 	"gorm.io/gorm"
 	"gorm.io/gorm/schema"
 	"log"
-	"vm/internal/infrastructure/globals"
 )
 
-func DbInit() {
+func DbInit() (db *gorm.DB) {
+	// 读取配置文件
 	type MySQLConfig struct {
 		Host     string
 		Port     int
@@ -22,7 +22,8 @@ func DbInit() {
 	if err := viper.UnmarshalKey("database", &config); err != nil {
 		log.Printf("无法解码为结构database: %s \n", err)
 	}
-	
+
+	// 参数设置
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local",
 		config.User,
 		config.Password,
@@ -30,7 +31,7 @@ func DbInit() {
 		config.Port,
 		config.Name,
 	)
-	
+	// 连接数据库
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{
 		DisableForeignKeyConstraintWhenMigrating: true, // 取消外键约束
 		NamingStrategy: schema.NamingStrategy{
@@ -38,7 +39,8 @@ func DbInit() {
 		},
 	})
 	if err != nil {
-		log.Printf("连接database失败: %v", err)
+		log.Panicf("连接database失败: %v", err)
 	}
-	globals.DB = db
+
+	return db
 }
