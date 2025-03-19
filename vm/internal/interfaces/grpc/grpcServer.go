@@ -3,6 +3,7 @@ package grpc
 import (
 	"context"
 	vmProto "github.com/world-fish/proto/vm"
+	"log"
 	services "vm/internal/application/pve"
 )
 
@@ -12,12 +13,16 @@ type GRPCServer struct {
 	PVEServer services.IPVEServer
 }
 
+var _ vmProto.VMManagerServer = (*GRPCServer)(nil)
+
 func NewGRPCServer(PVEServer services.IPVEServer) *GRPCServer {
 	return &GRPCServer{PVEServer: PVEServer}
+
 }
 
 func (G GRPCServer) CreateVM(ctx context.Context, req *vmProto.CreateVMReq) (*vmProto.CreateVMResp, error) {
 	// 验证参数
+	log.Printf("siwu发送创建虚拟机请求")
 
 	// 调用业务逻辑
 	//vmServer := services.NewVMServer(G.DB, G.WS)

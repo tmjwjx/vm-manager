@@ -1,7 +1,6 @@
 package main
 
 import (
-	"github.com/gorilla/websocket"
 	vmProto "github.com/world-fish/proto/vm"
 	"google.golang.org/grpc"
 	"log"
@@ -9,17 +8,16 @@ import (
 	"net/http"
 	pveAppServices "vm/internal/application/pve"
 	vmAppServices "vm/internal/application/virtualMachine"
-	pveDomainServices "vm/internal/domain/pve/services"
-	vmDominServices "vm/internal/domain/virtualMachine/services"
 	"vm/internal/infrastructure/inits"
 	"vm/internal/infrastructure/persistence/mysql"
+	websocket2 "vm/internal/infrastructure/websocket"
 	grpcInterface "vm/internal/interfaces/grpc"
 	"vm/internal/interfaces/middleware"
 	wsInterface "vm/internal/interfaces/websocket"
 )
 
 func main() {
-	
+
 	// 配置文件初始化
 	inits.ConfigInit()
 	// 日志配置
@@ -30,20 +28,22 @@ func main() {
 	inits.TableInit(db)
 	// redis连接
 	rdb := inits.RedisInit()
-	
+
 	// 创建websocket连接指针
-	var wsConn *websocket.Conn
-	
-	// websocket服务 和 grpc服务
-	w := wsInterface.NewWSServer(&wsConn, vmAppServices.NewVMServer(vmDominServices.NewVMService(mysql.NewVmRepo(db))))
-	g := grpcInterface.NewGRPCServer(pveAppServices.NewPVEServer(pveDomainServices.NewPVEService(&wsConn)))
-	
-	// 开启http服务
+	wsConn := websocket2.NewWebSocketClient()
+	vmRepo := mysql.NewVmRepo(db)
+
+	// grpc服务
+	g := grpcInterface.NewGRPCServer(pveAppServices.NewPVEServer(wsConn))
+	// websocket服务
+	w := wsInterface.NewWSServer(pveAppServices.NewPVEServer(wsConn), vmAppServices.NewVMServer(vmRepo))
+
+	// 开启http服务(websocket)
 	go func() {
 		http.Handle("/", w)
 		_ = http.ListenAndServe(":8088", nil)
 	}()
-	
+
 	// 开启gRPC服务
 	// 开启端口监听
 	listen, err := net.Listen("tcp", ":8888")
@@ -58,5 +58,5 @@ func main() {
 	if err != nil {
 		log.Printf("启动失败: %v", err)
 	}
-	
+
 }
