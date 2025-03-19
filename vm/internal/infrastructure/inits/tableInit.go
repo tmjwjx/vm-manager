@@ -1,13 +1,13 @@
 package inits
 
 import (
+	"gorm.io/gorm"
 	"log"
 	"vm/internal/domain/virtualMachine/entity"
-	"vm/internal/infrastructure/globals"
 )
 
-func TableInit() {
-	err := globals.DB.AutoMigrate(
+func TableInit(db *gorm.DB) {
+	err := db.AutoMigrate(
 		&entity.VirtualMachine{},
 	)
 	if err != nil {

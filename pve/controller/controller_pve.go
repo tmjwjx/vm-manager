@@ -4,30 +4,27 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/websocket"
-	"pve/internal/logic"
-	"pve/internal/repo"
+	"pve/logic"
+	"pve/models"
 	"pve/pkg/globals"
 	"pve/pkg/utils"
 )
 
 func CreateVM(conn *websocket.Conn, data []byte) {
-	fmt.Println("create vm")
-
-	vmid, err := logic.CreateVM()
+	// 创建虚拟机
+	vmId, err := logic.CreateVM()
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-
+	
 	// 解压数据
-	e := struct {
-		Email string `json:"email"`
-	}{}
+	var e models.CreateReq
 	err = json.Unmarshal(data, &e)
-
+	
 	// 通知 vm 服务
-	s := &repo.CreateVM{
-		VMID:  vmid,
+	s := &models.CreateResp{
+		VMID:  vmId,
 		Email: e.Email,
 	}
 	b, err := json.Marshal(s)
@@ -35,14 +32,14 @@ func CreateVM(conn *websocket.Conn, data []byte) {
 		return
 	}
 	utils.Write(conn, globals.CreateType, b)
-
+	
 	// 回调siwu
 	logic.CreateVMCallback(s)
 }
 
 func DestroyVM(data []byte) {
-
+	
 	fmt.Println("Destroy vm")
 	logic.DestroyVM(data)
-
+	
 }

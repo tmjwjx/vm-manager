@@ -3,11 +3,11 @@ package utils
 import (
 	"fmt"
 	"pve/pkg/globals"
-
+	
 	"github.com/gorilla/websocket"
 )
 
-func Write(conn *websocket.Conn, t globals.DataType, b []byte) {
+func Write(conn *websocket.Conn, t string, b []byte) {
 	data := globals.Data{
 		Type: t,
 		Data: b,

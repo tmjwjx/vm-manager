@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"github.com/gorilla/websocket"
 	"log"
-	"pve/internal/controller"
+	"pve/controller"
 	"pve/pkg/globals"
 )
 
@@ -12,16 +12,16 @@ type WebsocketClient struct {
 	conn *websocket.Conn
 }
 
-func (wsc *WebsocketClient) ServerPve(messageType int, p []byte) {
-	data := globals.Data{}
-	err := json.Unmarshal(p, &data)
+func (W *WebsocketClient) ProcessMessage(mes []byte) {
+	var data globals.Data
+	err := json.Unmarshal(mes, &data)
 	if err != nil {
 		return
 	}
 	switch data.Type {
 	case globals.CreateType:
 		// 创建虚拟机
-		controller.CreateVM(wsc.conn, data.Data)
+		controller.CreateVM(W.conn, data.Data)
 	case globals.DestroyType:
 	
 	}
@@ -36,10 +36,10 @@ func main() {
 	}
 	wsc := WebsocketClient{conn: conn}
 	for {
-		m, p, err := wsc.conn.ReadMessage()
+		_, p, err := wsc.conn.ReadMessage()
 		if err != nil {
 			break
 		}
-		wsc.ServerPve(m, p)
+		wsc.ProcessMessage(p)
 	}
 }
