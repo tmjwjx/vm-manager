@@ -1,4 +1,4 @@
-package apis
+package websocket
 
 /*
 对pve项目发送的请求的结构体
@@ -19,5 +19,9 @@ type Data struct {
 }
 
 type CreateVMReq struct {
+	Email string `json:"email"`
+}
+type CreateResp struct {
+	VMID  string `json:"vmid"`
 	Email string `json:"email"`
 }

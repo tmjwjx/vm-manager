@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"vm/internal/domain/virtualMachine/entity"
-	"vm/internal/domain/virtualMachine/services"
+	"vm/internal/domain/virtualMachine/repo"
 )
 
 /*
@@ -15,12 +15,15 @@ type IVMServer interface {
 	ProcessMessage(message []byte)
 }
 
+var _ IVMServer = (*VMServer)(nil)
+
 type VMServer struct {
-	VMService services.IVMService
+	//VMService services.IVMService
+	vmRepo repo.IVirtualMachineRepository
 }
 
-func NewVMServer(VMService services.IVMService) *VMServer {
-	return &VMServer{VMService: VMService}
+func NewVMServer(vmRepo repo.IVirtualMachineRepository) *VMServer {
+	return &VMServer{vmRepo: vmRepo}
 }
 
 func (V *VMServer) ProcessMessage(message []byte) {
@@ -43,7 +46,7 @@ func (V *VMServer) ProcessMessage(message []byte) {
 
 		// 执行持久化操作
 		log.Printf("存储虚拟机信息: %v", vm)
-		err := V.VMService.CreateVM()
+		err := V.vmRepo.CreateVM(vm)
 		if err != nil {
 			log.Printf("存储虚拟机信息失败: %v", err)
 			return

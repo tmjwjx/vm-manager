@@ -6,11 +6,11 @@ import (
 )
 
 type VMRepo struct {
-	DB *gorm.DB
+	db *gorm.DB
 }
 
-func NewVmRepo(DB *gorm.DB) *VMRepo {
-	return &VMRepo{DB: DB}
+func NewVmRepo(db *gorm.DB) *VMRepo {
+	return &VMRepo{db: db}
 }
 
 func (vmRepo *VMRepo) CreateVM(vm *entity.VirtualMachine) error {
@@ -42,8 +42,8 @@ func (vmRepo *VMRepo) GetVMInfo(vm *entity.VirtualMachine) error {
 func (vmRepo *VMRepo) VerifyEmail(email string) (b bool) {
 	// 查询邮箱是否存在
 	var user entity.VirtualMachine
-	if err := vmRepo.DB.Where("email = ?", email).First(&user).Error; err != nil {
-		vmRepo.DB.Rollback()
+	if err := vmRepo.db.Where("email = ?", email).First(&user).Error; err != nil {
+		vmRepo.db.Rollback()
 		return
 	}
 	// 判断是否存在

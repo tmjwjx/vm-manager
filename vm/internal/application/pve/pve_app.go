@@ -2,6 +2,7 @@ package pve
 
 import (
 	"context"
+	"github.com/gorilla/websocket"
 	vmProto "github.com/world-fish/proto/vm"
 	pveDomainServices "vm/internal/domain/pve/services"
 )
@@ -17,17 +18,31 @@ type IPVEServer interface {
 	StopVM(ctx context.Context, req *vmProto.StopVMReq) (*vmProto.StopVMResp, error)
 	RenewVM(ctx context.Context, req *vmProto.RenewVMReq) (*vmProto.RenewVMResp, error)
 	GetVMInfo(ctx context.Context, req *vmProto.GetVMInfoReq) (*vmProto.GetVMInfoResp, error)
+	SetConn(conn *websocket.Conn)
+	ReceiveMessage() ([]byte, error)
 }
 
 type PVEServer struct {
-	PVEService pveDomainServices.IPVEService
+	pveService pveDomainServices.IPVEService
+}
+
+func (P PVEServer) ReceiveMessage() ([]byte, error) {
+	message, err := P.pveService.ReceiveMessage()
+	if err != nil {
+		return nil, err
+	}
+	return message, nil
 }
 
 var _ IPVEServer = &PVEServer{}
-var _ IPVEServer = (*PVEServer)(nil)
 
-func NewPVEServer(PVEService pveDomainServices.IPVEService) *PVEServer {
-	return &PVEServer{PVEService: PVEService}
+func NewPVEServer(pveService pveDomainServices.IPVEService) *PVEServer {
+	return &PVEServer{pveService: pveService}
+}
+
+func (P PVEServer) SetConn(conn *websocket.Conn) {
+	P.pveService.SetConn(conn)
+	return
 }
 
 func (P PVEServer) CreateVM(ctx context.Context, req *vmProto.CreateVMReq) (resp *vmProto.CreateVMResp, err error) {
@@ -37,7 +52,7 @@ func (P PVEServer) CreateVM(ctx context.Context, req *vmProto.CreateVMReq) (resp
 	// 验证邮箱是否存在
 
 	// 发送websocket消息
-	err = P.PVEService.CreateVM(email)
+	err = P.pveService.CreateVM(email)
 	if err != nil {
 		return nil, err
 	}

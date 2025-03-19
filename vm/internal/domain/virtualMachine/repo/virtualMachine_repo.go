@@ -1,4 +1,4 @@
-package repository
+package repo
 
 import "vm/internal/domain/virtualMachine/entity"
 
