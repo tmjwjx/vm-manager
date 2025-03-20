@@ -4,19 +4,21 @@ import (
 	"context"
 	vmProto "github.com/world-fish/proto/vm"
 	"log"
-	services "vm/internal/application/pve"
+	"vm/internal/application/pve"
+	"vm/internal/application/virtualMachine"
 )
 
 type GRPCServer struct {
 	// grpc的服务端实现
 	vmProto.UnimplementedVMManagerServer
-	PVEServer services.IPVEServer
+	pveServer pve.IPVEServer
+	vmServer  virtualMachine.IVMServer
 }
 
 var _ vmProto.VMManagerServer = (*GRPCServer)(nil)
 
-func NewGRPCServer(PVEServer services.IPVEServer) *GRPCServer {
-	return &GRPCServer{PVEServer: PVEServer}
+func NewGRPCServer(PVEServer pve.IPVEServer) *GRPCServer {
+	return &GRPCServer{pveServer: PVEServer}
 
 }
 
@@ -25,15 +27,14 @@ func (G GRPCServer) CreateVM(ctx context.Context, req *vmProto.CreateVMReq) (*vm
 	log.Printf("siwu发送创建虚拟机请求")
 
 	// 调用业务逻辑
-	//vmServer := services.NewVMServer(G.DB, G.WS)
-	resp, err := G.PVEServer.CreateVM(ctx, req)
+	resp, err := G.pveServer.CreateVM(ctx, req)
 	if err != nil {
 		// 返回错误
 		return nil, err
-	} else {
-		// 返回结果
-		return resp, nil
 	}
+	// 返回结果
+	return resp, nil
+
 }
 
 func (G GRPCServer) DestroyVM(ctx context.Context, req *vmProto.DestroyVMReq) (*vmProto.DestroyVMResp, error) {
