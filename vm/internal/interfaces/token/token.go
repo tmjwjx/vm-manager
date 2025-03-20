@@ -6,7 +6,7 @@ import (
 )
 
 // 用于签名和验证 JWT 的密钥，与 siwu 项目一致
-var jwtSecret = []byte("siwu-websocket-service.forumSetJwtSecret_S@mpl3ComplexS3cretK3y")
+var jwtSecret = []byte("siwu-web-service.forumSetJwtSecret_S@mpl3ComplexS3cretK3y")
 
 // Claims 自定义的 Claims 结构体，与 siwu 项目一致
 type Claims struct {

@@ -13,7 +13,11 @@ type PVEService struct {
 	ws *websocket.Conn
 }
 
-func (P PVEService) ReceiveMessage() (p []byte, err error) {
+func NewWebSocketClient() *PVEService {
+	return &PVEService{}
+}
+
+func (P *PVEService) ReceiveMessage() (p []byte, err error) {
 	_, p, err = P.ws.ReadMessage()
 	if err != nil {
 		log.Printf("读取消息失败: %v", err)
@@ -22,16 +26,12 @@ func (P PVEService) ReceiveMessage() (p []byte, err error) {
 	return p, nil
 }
 
-func NewWebSocketClient() *PVEService {
-	return &PVEService{}
-}
-
-func (P PVEService) SetConn(conn *websocket.Conn) {
+func (P *PVEService) SetConn(conn *websocket.Conn) {
 	P.ws = conn
 	return
 }
 
-func (P PVEService) CreateVM(email string) (err error) {
+func (P *PVEService) CreateVM(email string) (err error) {
 	// 构造请求消息
 	req := CreateVMReq{
 		Email: email,
@@ -64,27 +64,27 @@ func (P PVEService) CreateVM(email string) (err error) {
 	return
 }
 
-func (P PVEService) DestroyVM(vmId string) error {
+func (P *PVEService) DestroyVM(vmId string) error {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (P PVEService) StartVM(vmId string) error {
+func (P *PVEService) StartVM(vmId string) error {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (P PVEService) StopVM(vmId string) error {
+func (P *PVEService) StopVM(vmId string) error {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (P PVEService) RenewVM(vmId string) error {
+func (P *PVEService) RenewVM(vmId string) error {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (P PVEService) GetVMInfo(vmId string) error {
+func (P *PVEService) GetVMInfo(vmId string) error {
 	//TODO implement me
 	panic("implement me")
 }

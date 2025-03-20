@@ -7,6 +7,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
+	"log"
 	"strings"
 	"vm/internal/interfaces/token"
 )
@@ -21,20 +22,20 @@ func JWTInterceptor(rdb *redis.Client) grpc.UnaryServerInterceptor {
 		if !ok {
 			return nil, status.Errorf(codes.Unauthenticated, "missing metadata")
 		}
-		
+
 		// 获取 authorization 头
 		authHeaders, ok := md["authorization"]
 		if !ok || len(authHeaders) == 0 {
 			return nil, status.Errorf(codes.Unauthenticated, "missing authorization token")
 		}
-		
+
 		// 提取 Token，格式为 "Bearer <token>"
 		authHeader := authHeaders[0]
 		tokenString := strings.TrimPrefix(authHeader, "Bearer ")
 		if tokenString == authHeader {
 			return nil, status.Errorf(codes.Unauthenticated, "invalid token format")
 		}
-		
+
 		// 检查 Token 是否在黑名单中
 		isBlacklisted, err := token.IsTokenBlacklisted(rdb, tokenString)
 		if err != nil {
@@ -43,17 +44,18 @@ func JWTInterceptor(rdb *redis.Client) grpc.UnaryServerInterceptor {
 		if isBlacklisted {
 			return nil, status.Errorf(codes.Unauthenticated, "token is blacklisted")
 		}
-		
+
 		// 验证 Token
 		claims, err := token.ValidateToken(tokenString)
+		log.Printf(tokenString)
 		if err != nil {
 			return nil, status.Errorf(codes.Unauthenticated, "invalid token: %v", err)
 		}
-		
+
 		// 将邮箱放入上下文
 		newCtx := context.WithValue(ctx, "email", claims.Email)
 		// newCtx = context.WithValue(newCtx, "userID", claims.ID)
-		
+
 		// 调用实际的处理函数
 		return handler(newCtx, req)
 	}

@@ -32,11 +32,13 @@ func main() {
 	// 创建websocket连接指针
 	wsConn := websocket2.NewWebSocketClient()
 	vmRepo := mysql.NewVmRepo(db)
+	pve := pveAppServices.NewPVEServer(wsConn)
+	vm := vmAppServices.NewVMServer(vmRepo)
 
 	// grpc服务
-	g := grpcInterface.NewGRPCServer(pveAppServices.NewPVEServer(wsConn))
+	g := grpcInterface.NewGRPCServer(pve)
 	// websocket服务
-	w := wsInterface.NewWSServer(pveAppServices.NewPVEServer(wsConn), vmAppServices.NewVMServer(vmRepo))
+	w := wsInterface.NewWSServer(pve, vm)
 
 	// 开启http服务(websocket)
 	go func() {
@@ -51,7 +53,8 @@ func main() {
 		log.Printf("监听失败: %v", err)
 	}
 	// 注册grpc服务
-	grpcServer := grpc.NewServer(grpc.ChainUnaryInterceptor(middleware.JWTInterceptor(rdb)))
+	jwt := middleware.JWTInterceptor(rdb)
+	grpcServer := grpc.NewServer(grpc.ChainUnaryInterceptor(jwt))
 	vmProto.RegisterVMManagerServer(grpcServer, g)
 	// 启动服务
 	err = grpcServer.Serve(listen)
