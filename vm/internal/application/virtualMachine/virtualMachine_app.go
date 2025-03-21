@@ -1,8 +1,13 @@
 package virtualMachine
 
 import (
+	"context"
 	"encoding/json"
+	"errors"
+	vmProto "github.com/world-fish/proto/vm"
 	"log"
+	"time"
+	"vm/internal/domain/pve/services"
 	"vm/internal/domain/virtualMachine/entity"
 	"vm/internal/domain/virtualMachine/repo"
 )
@@ -13,17 +18,41 @@ import (
 
 type IVMServer interface {
 	ProcessMessage(message []byte)
+	RenewVM(ctx context.Context, req *vmProto.RenewVMReq) (*vmProto.RenewVMResp, error)
 }
 
 var _ IVMServer = (*VMServer)(nil)
 
 type VMServer struct {
-	//VMService services.IVMService
-	vmRepo repo.IVirtualMachineRepository
+	pveService services.IPVEService
+	vmRepo     repo.IVirtualMachineRepository
 }
 
-func NewVMServer(vmRepo repo.IVirtualMachineRepository) *VMServer {
-	return &VMServer{vmRepo: vmRepo}
+func (V *VMServer) RenewVM(ctx context.Context, req *vmProto.RenewVMReq) (resp *vmProto.RenewVMResp, err error) {
+	// 获取参数
+	email := ctx.Value("email").(string)
+	day := int(req.Day)
+	// 判断虚拟机是否存在
+	ok := V.vmRepo.VerifyEmail(email)
+	if !ok {
+		log.Printf("虚拟机不存在")
+		return nil, errors.New("虚拟机不存在")
+	}
+
+	// 续期虚拟机
+	err = V.vmRepo.RenewVM(email, day)
+	if err != nil {
+		log.Printf("续期虚拟机失败: %v", err)
+		return nil, err
+	}
+	resp.Result = true
+
+	// 返回结果
+	return resp, nil
+}
+
+func NewVMServer(pveService services.IPVEService, vmRepo repo.IVirtualMachineRepository) *VMServer {
+	return &VMServer{pveService: pveService, vmRepo: vmRepo}
 }
 
 func (V *VMServer) ProcessMessage(message []byte) {
@@ -39,9 +68,12 @@ func (V *VMServer) ProcessMessage(message []byte) {
 		rep := CreateResp{}
 		_ = json.Unmarshal(data.Data, &rep)
 
+		var now time.Time = time.Now().AddDate(0, 1, 0)
 		vm := &entity.VirtualMachine{
-			VMID:  rep.VMID,
-			Email: rep.Email,
+			VMID:           rep.VMID,
+			Email:          rep.Email,
+			IPAddr:         rep.IPAddr,
+			ExpirationTime: &now,
 		}
 
 		// 执行持久化操作

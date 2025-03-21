@@ -2,9 +2,14 @@ package pve
 
 import (
 	"context"
+	"encoding/json"
+	"errors"
 	"github.com/gorilla/websocket"
 	vmProto "github.com/world-fish/proto/vm"
+	"log"
 	pveDomainServices "vm/internal/domain/pve/services"
+	"vm/internal/domain/virtualMachine/repo"
+	"vm/internal/infrastructure/utils"
 )
 
 /*
@@ -22,8 +27,15 @@ type IPVEServer interface {
 	ReceiveMessage() ([]byte, error)
 }
 
+var _ IPVEServer = &PVEServer{}
+
 type PVEServer struct {
 	pveService pveDomainServices.IPVEService
+	vmRepo     repo.IVirtualMachineRepository
+}
+
+func NewPVEServer(pveService pveDomainServices.IPVEService, vmService repo.IVirtualMachineRepository) *PVEServer {
+	return &PVEServer{pveService: pveService, vmRepo: vmService}
 }
 
 func (P PVEServer) ReceiveMessage() ([]byte, error) {
@@ -32,12 +44,6 @@ func (P PVEServer) ReceiveMessage() ([]byte, error) {
 		return nil, err
 	}
 	return message, nil
-}
-
-var _ IPVEServer = &PVEServer{}
-
-func NewPVEServer(pveService pveDomainServices.IPVEService) *PVEServer {
-	return &PVEServer{pveService: pveService}
 }
 
 func (P PVEServer) SetConn(conn *websocket.Conn) {
@@ -49,10 +55,38 @@ func (P PVEServer) CreateVM(ctx context.Context, req *vmProto.CreateVMReq) (resp
 	// 解析参数
 	email := ctx.Value("email").(string)
 	// 验证邮箱格式
+	ok := utils.VerifyEmail(email)
+	if !ok {
+		log.Printf("邮箱格式错误")
+		return nil, errors.New("邮箱格式错误")
+	}
 	// 验证邮箱是否存在
+	P.vmRepo.VerifyEmail(email)
+
+	// 构建请求消息
+	createVMReq := &CreateVMReq{
+		Email: email,
+	}
+	// 序列化请求消息
+	b, err := json.Marshal(createVMReq)
+	if err != nil {
+		log.Printf("json 序列化失败: %v", err)
+		return nil, err
+	}
+	// 封装请求消息
+	data := Data{
+		Type: CreateType,
+		Data: b,
+	}
+	// 再次序列化
+	b, err = json.Marshal(data)
+	if err != nil {
+		log.Printf("json 序列化失败: %v", err)
+		return nil, err
+	}
 
 	// 发送websocket消息
-	err = P.pveService.CreateVM(email)
+	err = P.pveService.SendMessage(b)
 	if err != nil {
 		return nil, err
 	}
