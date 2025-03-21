@@ -32,11 +32,11 @@ func main() {
 	// 创建websocket连接指针
 	wsConn := websocket2.NewWebSocketClient()
 	vmRepo := mysql.NewVmRepo(db)
-	pve := pveAppServices.NewPVEServer(wsConn)
-	vm := vmAppServices.NewVMServer(vmRepo)
+	pve := pveAppServices.NewPVEServer(wsConn, vmRepo)
+	vm := vmAppServices.NewVMServer(wsConn, vmRepo)
 
 	// grpc服务
-	g := grpcInterface.NewGRPCServer(pve)
+	g := grpcInterface.NewGRPCServer(pve, vm)
 	// websocket服务
 	w := wsInterface.NewWSServer(pve, vm)
 

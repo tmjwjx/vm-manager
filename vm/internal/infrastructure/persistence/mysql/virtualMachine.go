@@ -2,6 +2,8 @@ package mysql
 
 import (
 	"gorm.io/gorm"
+	"log"
+	"time"
 	"vm/internal/domain/virtualMachine/entity"
 )
 
@@ -14,8 +16,17 @@ func NewVmRepo(db *gorm.DB) *VMRepo {
 }
 
 func (vmRepo *VMRepo) CreateVM(vm *entity.VirtualMachine) error {
-	//TODO implement me
-	panic("implement me")
+	// 开启事务
+	tx := vmRepo.db.Begin()
+	// 创建虚拟机
+	if err := tx.Create(vm).Error; err != nil {
+		log.Printf("创建虚拟机失败: %v", err)
+		tx.Rollback()
+		return err
+	}
+	// 提交
+	tx.Commit()
+	return nil
 }
 
 func (vmRepo *VMRepo) DestroyVM(vm *entity.VirtualMachine) error {
@@ -23,9 +34,35 @@ func (vmRepo *VMRepo) DestroyVM(vm *entity.VirtualMachine) error {
 	panic("implement me")
 }
 
-func (vmRepo *VMRepo) RenewVM(vm *entity.VirtualMachine) error {
-	//TODO implement me
-	panic("implement me")
+func (vmRepo *VMRepo) RenewVM(email string, day int) error {
+	// 开启事务
+	tx := vmRepo.db.Begin()
+	// 查询虚拟机
+	var vm entity.VirtualMachine
+	if err := tx.Where("email = ?", email).First(&vm).Error; err != nil {
+		log.Printf("查询虚拟机失败: %v", err)
+		tx.Rollback()
+		return err
+	}
+	// 续期
+	if vm.ExpirationTime != nil {
+		newTime := vm.ExpirationTime.AddDate(0, 0, day)
+		vm.ExpirationTime = &newTime
+	} else {
+		// 处理ExpirationTime为nil的情况
+		now := time.Now()
+		newTime := now.AddDate(0, 0, day)
+		vm.ExpirationTime = &newTime
+	}
+	// 更新
+	if err := tx.Save(&vm).Error; err != nil {
+		log.Printf("续期虚拟机失败: %v", err)
+		tx.Rollback()
+		return err
+	}
+	// 提交
+	tx.Commit()
+	return nil
 }
 
 func (vmRepo *VMRepo) GetVMInfo(vm *entity.VirtualMachine) error {

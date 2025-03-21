@@ -1,7 +1,7 @@
-package virtualMachine
+package pve
 
 /*
-接受pve项目的响应的结构体
+对pve项目发送的请求的结构体
 */
 
 const (
@@ -18,8 +18,10 @@ type Data struct {
 	Data []byte `json:"data"`
 }
 
+type CreateVMReq struct {
+	Email string `json:"email"`
+}
 type CreateResp struct {
-	VMID   string `json:"vmid"`
-	Email  string `json:"email"`
-	IPAddr string `json:"ip_addr"`
+	VMID  string `json:"vmid"`
+	Email string `json:"email"`
 }
