@@ -1,6 +1,7 @@
 package mysql
 
 import (
+	"errors"
 	"gorm.io/gorm"
 	"log"
 	"time"
@@ -30,7 +31,7 @@ func (vmRepo *VMRepo) CreateVM(vm *entity.VirtualMachine) error {
 }
 
 func (vmRepo *VMRepo) DestroyVM(vm *entity.VirtualMachine) error {
-	//TODO implement me
+	// TODO implement me
 	panic("implement me")
 }
 
@@ -66,7 +67,7 @@ func (vmRepo *VMRepo) RenewVM(email string, day int) error {
 }
 
 func (vmRepo *VMRepo) GetVMInfo(vm *entity.VirtualMachine) error {
-	//TODO implement me
+	// TODO implement me
 	panic("implement me")
 }
 
@@ -89,4 +90,38 @@ func (vmRepo *VMRepo) VerifyEmail(email string) (b bool) {
 	} else {
 		return true
 	}
+}
+
+// GetExpiringVMs 获取今天将要过期的数据，并按过期时间排序
+func (vmRepo *VMRepo) GetExpiringVMs() []*entity.VirtualMachine {
+	var vms []*entity.VirtualMachine
+	now := time.Now()
+	end := now.Add(24 * time.Hour)
+
+	// 查询条件：过期时间在当前时间之后且在未来 24 小时之内
+	err := vmRepo.db.
+		Where("expire_at > ? AND expire_at < ?", now, end).
+		Order("expire_at ASC"). // 按过期时间升序排序
+		Find(&vms).Error
+
+	if err != nil {
+		log.Printf("查询虚拟机错误：%v\n", err)
+		return nil
+	}
+
+	return vms
+}
+
+// FindByID 根据ID查找虚拟机
+func (vmRepo *VMRepo) FindByID(id string) *entity.VirtualMachine {
+	var vm entity.VirtualMachine
+	err := vmRepo.db.Where("id = ?", id).First(&vm).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil
+		}
+		log.Printf("查找虚拟机失败: %v", err)
+		return nil
+	}
+	return &vm
 }
