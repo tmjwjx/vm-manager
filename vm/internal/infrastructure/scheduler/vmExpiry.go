@@ -5,21 +5,22 @@ import (
 	"log"
 	"strconv"
 	"time"
+	"vm/internal/domain/kafka/entity"
+	"vm/internal/domain/virtualMachine/repo"
 	kafkaVm "vm/internal/infrastructure/kafka"
-	mysqlVm "vm/internal/infrastructure/persistence/mysql"
 )
 
 // VMScheduler 定义调度器结构
 type VMScheduler struct {
-	db          *mysqlVm.VMRepo
+	vmRepo      repo.IVirtualMachineRepository
 	kafkaClient *kafkaVm.KafkaClient
 	cron        *cron.Cron
 }
 
 // NewVMScheduler 创建调度器实例
-func NewVMScheduler(db *mysqlVm.VMRepo, kafkaClient *kafkaVm.KafkaClient) *VMScheduler {
+func NewVMScheduler(vmRepo repo.IVirtualMachineRepository, kafkaClient *kafkaVm.KafkaClient) *VMScheduler {
 	return &VMScheduler{
-		db:          db,
+		vmRepo:      vmRepo,
 		kafkaClient: kafkaClient,
 		cron:        cron.New(),
 	}
@@ -27,32 +28,53 @@ func NewVMScheduler(db *mysqlVm.VMRepo, kafkaClient *kafkaVm.KafkaClient) *VMSch
 
 // Start 启动调度器
 func (s *VMScheduler) Start() {
+	// 每天早上 8 点执行
 	_, err := s.cron.AddFunc("0 8 * * *", func() {
 		log.Println("Running cron job at 8:00 AM")
-		vms := s.db.GetExpiringVMs()
 		now := time.Now()
 
-		for _, vm := range vms {
-			notifyTime := time.Unix(vm.ExpirationTime.Unix()-2*3600, 0)
-			if notifyTime.After(now) && notifyTime.Before(now.Add(24*time.Hour)) {
-				taskNotify := &kafkaVm.Task{
-					VMID:     strconv.Itoa(int(vm.ID)),
-					ExpireAt: notifyTime.Unix(),
-					TaskType: "notify", // 设置任务类型
-				}
-				if err := s.kafkaClient.ProduceTask(taskNotify, "vm_notify"); err != nil {
-					log.Printf("Failed to produce notify task for VM %s: %v", vm.ID, err)
-				}
-			}
+		// 1. 获取提前两天需要通知的虚拟机（两天后过期）
+		vmsToNotify, err := s.vmRepo.GetExpiringVMs(2)
+		if err != nil {
+			log.Printf("Failed to get VMs expiring in 2 days: %v", err)
+			return
+		}
 
-			if vm.ExpirationTime.After(now) && vm.ExpirationTime.Before(now.Add(24*time.Hour)) {
-				taskDestroy := &kafkaVm.Task{
+		// 2. 获取当天需要销毁的虚拟机（今天过期）
+		vmsToDestroy, err := s.vmRepo.GetExpiringVMs(1)
+		if err != nil {
+			log.Printf("Failed to get VMs expiring today: %v", err)
+			return
+		}
+
+		// 处理通知任务（提前2天通知）
+		for _, vm := range vmsToNotify {
+			// 计算通知时间（这里直接使用当前时间，因为我们已经在两天前通知）
+			taskNotify := &entity.Task{
+				VMID:     strconv.Itoa(int(vm.ID)),
+				ExpireAt: vm.ExpirationTime.Unix(), // 记录实际过期时间
+				TaskType: "notify",
+			}
+			if err := s.kafkaClient.ProduceTask(taskNotify, "vm_notify"); err != nil {
+				log.Printf("Failed to produce notify task for VM %d: %v", vm.ID, err)
+			} else {
+				log.Printf("Sent notification for VM %d, expires at %v", vm.ID, vm.ExpirationTime)
+			}
+		}
+
+		// 处理销毁任务（当天过期）
+		for _, vm := range vmsToDestroy {
+			// 如果虚拟机已过期或当天即将过期，立即安排销毁
+			if vm.ExpirationTime.Before(now) || vm.ExpirationTime.Equal(now) {
+				taskDestroy := &entity.Task{
 					VMID:     strconv.Itoa(int(vm.ID)),
 					ExpireAt: vm.ExpirationTime.Unix(),
-					TaskType: "destroy", // 设置任务类型
+					TaskType: "destroy",
 				}
 				if err := s.kafkaClient.ProduceTask(taskDestroy, "vm_destroy"); err != nil {
-					log.Printf("Failed to produce destroy task for VM %v: %v", vm.ID, err)
+					log.Printf("Failed to produce destroy task for VM %d: %v", vm.ID, err)
+				} else {
+					log.Printf("Scheduled destruction for VM %d, expired at %v", vm.ID, vm.ExpirationTime)
 				}
 			}
 		}
@@ -60,5 +82,7 @@ func (s *VMScheduler) Start() {
 	if err != nil {
 		log.Fatalf("Failed to add cron job: %v", err)
 	}
+
+	// 启动 cron 调度器
 	s.cron.Start()
 }
