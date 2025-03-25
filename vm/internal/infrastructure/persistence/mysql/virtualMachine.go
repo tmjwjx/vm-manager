@@ -30,7 +30,7 @@ func (vmRepo *VMRepo) CreateVM(vm *entity.VirtualMachine) error {
 	return nil
 }
 
-func (vmRepo *VMRepo) DestroyVM(vm *entity.VirtualMachine) error {
+func (vmRepo *VMRepo) DestroyVM(vmId string) error {
 	// TODO implement me
 	panic("implement me")
 }
@@ -92,24 +92,25 @@ func (vmRepo *VMRepo) VerifyEmail(email string) (b bool) {
 	}
 }
 
-// GetExpiringVMs 获取今天将要过期的数据，并按过期时间排序
-func (vmRepo *VMRepo) GetExpiringVMs() []*entity.VirtualMachine {
+// GetExpiringVMs 获取即将过期的数据，支持指定天数范围，并按过期时间排序
+func (vmRepo *VMRepo) GetExpiringVMs(days int) ([]*entity.VirtualMachine, error) {
 	var vms []*entity.VirtualMachine
 	now := time.Now()
-	end := now.Add(24 * time.Hour)
+	// 计算查询的结束时间，根据传入的天数
+	end := now.Add(time.Duration(days*24) * time.Hour)
 
-	// 查询条件：过期时间在当前时间之后且在未来 24 小时之内
+	// 查询条件：过期时间在当前时间之后且在指定天数之内
 	err := vmRepo.db.
-		Where("expire_at > ? AND expire_at < ?", now, end).
+		Where("expire_at > ? AND expire_at <= ?", now, end).
 		Order("expire_at ASC"). // 按过期时间升序排序
 		Find(&vms).Error
 
 	if err != nil {
-		log.Printf("查询虚拟机错误：%v\n", err)
-		return nil
+		log.Printf("查询虚拟机错误（%d天内到期）：%v\n", days, err)
+		return nil, err
 	}
 
-	return vms
+	return vms, nil
 }
 
 // FindByID 根据ID查找虚拟机
