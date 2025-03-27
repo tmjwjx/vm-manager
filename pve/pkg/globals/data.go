@@ -8,4 +8,5 @@ type Data struct {
 const (
 	CreateType  string = "create"
 	DestroyType string = "destroy"
+	StartType   string = "start"
 )

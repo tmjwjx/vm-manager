@@ -28,7 +28,12 @@ type VMServer struct {
 	vmRepo     repo.IVirtualMachineRepository
 }
 
+func NewVMServer(pveService services.IPVEService, vmRepo repo.IVirtualMachineRepository) *VMServer {
+	return &VMServer{pveService: pveService, vmRepo: vmRepo}
+}
+
 func (V *VMServer) RenewVM(ctx context.Context, req *vmProto.RenewVMReq) (resp *vmProto.RenewVMResp, err error) {
+	resp = &vmProto.RenewVMResp{}
 	// 获取参数
 	email := ctx.Value("email").(string)
 	day := int(req.Day)
@@ -36,23 +41,19 @@ func (V *VMServer) RenewVM(ctx context.Context, req *vmProto.RenewVMReq) (resp *
 	ok := V.vmRepo.VerifyEmail(email)
 	if !ok {
 		log.Printf("虚拟机不存在")
-		return nil, errors.New("虚拟机不存在")
+		return resp, errors.New("虚拟机不存在")
 	}
 
 	// 续期虚拟机
 	err = V.vmRepo.RenewVM(email, day)
 	if err != nil {
 		log.Printf("续期虚拟机失败: %v", err)
-		return nil, err
+		return resp, err
 	}
 	resp.Result = true
 
 	// 返回结果
 	return resp, nil
-}
-
-func NewVMServer(pveService services.IPVEService, vmRepo repo.IVirtualMachineRepository) *VMServer {
-	return &VMServer{pveService: pveService, vmRepo: vmRepo}
 }
 
 func (V *VMServer) ProcessMessage(message []byte) {

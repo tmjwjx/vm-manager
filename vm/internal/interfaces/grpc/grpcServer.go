@@ -40,8 +40,11 @@ func (G GRPCServer) DestroyVM(ctx context.Context, req *vmProto.DestroyVMReq) (*
 }
 
 func (G GRPCServer) StartVM(ctx context.Context, req *vmProto.StartVMReq) (*vmProto.StartVMResp, error) {
-	//TODO implement me
-	panic("implement me")
+	vm, err := G.pveServer.StartVM(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	return vm, nil
 }
 
 func (G GRPCServer) StopVM(ctx context.Context, req *vmProto.StopVMReq) (*vmProto.StopVMResp, error) {

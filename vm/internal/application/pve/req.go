@@ -21,7 +21,7 @@ type Data struct {
 type CreateVMReq struct {
 	Email string `json:"email"`
 }
-type CreateResp struct {
-	VMID  string `json:"vmid"`
-	Email string `json:"email"`
+
+type StartVMReq struct {
+	VMID string `json:"vm_id"`
 }

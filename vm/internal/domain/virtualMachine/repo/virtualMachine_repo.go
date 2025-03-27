@@ -13,8 +13,8 @@ type IVirtualMachineRepository interface {
 	DestroyVM(vm *entity.VirtualMachine) error
 	// RenewVM 虚拟机续期
 	RenewVM(email string, day int) error
-	// GetVMInfo 获取虚拟机信息
-	GetVMInfo(vm *entity.VirtualMachine) error
+	// GetVMInfoByEmail 通过邮箱获取虚拟机信息
+	GetVMInfoByEmail(email string) (*entity.VirtualMachine, error)
 	// VerifyEmail 验证邮箱是否存在
 	VerifyEmail(email string) bool
 }

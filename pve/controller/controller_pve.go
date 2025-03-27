@@ -10,11 +10,28 @@ import (
 	"pve/pkg/utils"
 )
 
+func StartVM(conn *websocket.Conn, data []byte) {
+	// 解压数据
+	var e models.StartReq
+	err := json.Unmarshal(data, &e)
+	if err != nil {
+		return
+	}
+
+	// 启动虚拟机
+	err = logic.StartVM(e.VMID)
+	if err != nil {
+		fmt.Println("启动虚拟机错误 err =", err)
+		return
+	}
+
+}
+
 func CreateVM(conn *websocket.Conn, data []byte) {
 	// 创建虚拟机
 	vmId, err := logic.CreateVM()
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("创建虚拟机错误 err =", err)
 		return
 	}
 
@@ -22,10 +39,16 @@ func CreateVM(conn *websocket.Conn, data []byte) {
 	var e models.CreateReq
 	err = json.Unmarshal(data, &e)
 
+	// 启动虚拟机
+	err = logic.StartVM(vmId)
+	if err != nil {
+		fmt.Println("启动虚拟机错误 err =", err)
+	}
+
 	// 获取虚拟机的IP地址
 	ipAddr, err := logic.GetIPAddr(vmId)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("获取虚拟机IP地址错误 err =", err)
 	}
 
 	// 通知 vm 服务

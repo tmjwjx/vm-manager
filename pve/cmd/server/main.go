@@ -23,7 +23,9 @@ func (W *WebsocketClient) ProcessMessage(mes []byte) {
 		// 创建虚拟机
 		controller.CreateVM(W.conn, data.Data)
 	case globals.DestroyType:
-	
+	case globals.StartType:
+		controller.StartVM(W.conn, data.Data)
+
 	}
 }
 

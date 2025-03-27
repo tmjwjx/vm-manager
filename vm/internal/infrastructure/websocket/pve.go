@@ -12,7 +12,7 @@ type PVEService struct {
 func (P *PVEService) SendMessage(data []byte) (err error) {
 
 	// 发送消息
-	err = (P.ws).WriteMessage(websocket.TextMessage, data)
+	err = P.ws.WriteMessage(websocket.TextMessage, data)
 	if err != nil {
 		log.Printf("发送请求失败: %v", err)
 		return err

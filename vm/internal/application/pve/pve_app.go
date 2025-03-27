@@ -52,6 +52,8 @@ func (P PVEServer) SetConn(conn *websocket.Conn) {
 }
 
 func (P PVEServer) CreateVM(ctx context.Context, req *vmProto.CreateVMReq) (resp *vmProto.CreateVMResp, err error) {
+	resp = &vmProto.CreateVMResp{}
+
 	// 解析参数
 	email := ctx.Value("email").(string)
 	// 验证邮箱格式
@@ -61,7 +63,10 @@ func (P PVEServer) CreateVM(ctx context.Context, req *vmProto.CreateVMReq) (resp
 		return nil, errors.New("邮箱格式错误")
 	}
 	// 验证邮箱是否存在
-	P.vmRepo.VerifyEmail(email)
+	if P.vmRepo.VerifyEmail(email) {
+		log.Printf("邮箱存在")
+		return nil, errors.New("邮箱存在")
+	}
 
 	// 构建请求消息
 	createVMReq := &CreateVMReq{
@@ -91,6 +96,8 @@ func (P PVEServer) CreateVM(ctx context.Context, req *vmProto.CreateVMReq) (resp
 		return nil, err
 	}
 
+	resp.Result = true
+
 	// 返回结果
 	return
 }
@@ -101,8 +108,47 @@ func (P PVEServer) DestroyVM(ctx context.Context, req *vmProto.DestroyVMReq) (*v
 }
 
 func (P PVEServer) StartVM(ctx context.Context, req *vmProto.StartVMReq) (*vmProto.StartVMResp, error) {
-	//TODO implement me
-	panic("implement me")
+
+	resp := &vmProto.StartVMResp{}
+
+	// 获取vmId
+	email := ctx.Value("email").(string)
+	vm, err := P.vmRepo.GetVMInfoByEmail(email)
+	if err != nil {
+		return nil, err
+	}
+
+	// 构建请求消息
+	startVMReq := &StartVMReq{
+		VMID: vm.VMID,
+	}
+	// 序列化请求消息
+	b, err := json.Marshal(startVMReq)
+	if err != nil {
+		log.Printf("json 序列化失败: %v", err)
+		return nil, err
+	}
+	// 封装请求消息
+	data := Data{
+		Type: StartType,
+		Data: b,
+	}
+	// 再次序列化
+	b, err = json.Marshal(data)
+	if err != nil {
+		log.Printf("json 序列化失败: %v", err)
+		return nil, err
+	}
+
+	// 发送websocket消息
+	err = P.pveService.SendMessage(b)
+	if err != nil {
+		return nil, err
+	}
+
+	// 返回结果
+	resp.Result = true
+	return resp, nil
 }
 
 func (P PVEServer) StopVM(ctx context.Context, req *vmProto.StopVMReq) (*vmProto.StopVMResp, error) {

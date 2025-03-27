@@ -1,6 +1,7 @@
 package mysql
 
 import (
+	"errors"
 	"gorm.io/gorm"
 	"log"
 	"time"
@@ -65,9 +66,13 @@ func (vmRepo *VMRepo) RenewVM(email string, day int) error {
 	return nil
 }
 
-func (vmRepo *VMRepo) GetVMInfo(vm *entity.VirtualMachine) error {
-	//TODO implement me
-	panic("implement me")
+func (vmRepo *VMRepo) GetVMInfoByEmail(email string) (vm *entity.VirtualMachine, err error) {
+	// 查询虚拟机
+	if err := vmRepo.db.Where("email = ?", email).First(vm).Error; err != nil {
+		log.Printf("查询虚拟机失败: %v", err)
+		return nil, err
+	}
+	return vm, nil
 }
 
 // VerifyEmail
@@ -80,8 +85,10 @@ func (vmRepo *VMRepo) VerifyEmail(email string) (b bool) {
 	// 查询邮箱是否存在
 	var user entity.VirtualMachine
 	if err := vmRepo.db.Where("email = ?", email).First(&user).Error; err != nil {
-		vmRepo.db.Rollback()
-		return
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			log.Printf("查询邮箱失败: %v", err)
+			return false
+		}
 	}
 	// 判断是否存在
 	if user.ID == 0 {
