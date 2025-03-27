@@ -31,8 +31,20 @@ func (vmRepo *VMRepo) CreateVM(vm *entity.VirtualMachine) error {
 }
 
 func (vmRepo *VMRepo) DestroyVM(vmId string) error {
-	// TODO implement me
-	panic("implement me")
+	// 开启事务
+	tx := vmRepo.db.Begin()
+
+	// 删除虚拟机
+	if err := tx.Where("vm_id = ?", vmId).Delete(&entity.VirtualMachine{}).Error; err != nil {
+		log.Printf("删除虚拟机失败: %v", err)
+		tx.Rollback()
+		return err
+	}
+
+	// 提交
+	tx.Commit()
+	return nil
+
 }
 
 func (vmRepo *VMRepo) RenewVM(email string, day int) error {
@@ -116,7 +128,7 @@ func (vmRepo *VMRepo) GetExpiringVMs(days int) ([]*entity.VirtualMachine, error)
 // FindByID 根据ID查找虚拟机
 func (vmRepo *VMRepo) FindByID(id string) *entity.VirtualMachine {
 	var vm entity.VirtualMachine
-	err := vmRepo.db.Where("id = ?", id).First(&vm).Error
+	err := vmRepo.db.Where("vm_id = ?", id).First(&vm).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil

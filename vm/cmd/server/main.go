@@ -71,4 +71,12 @@ func main() {
 		log.Printf("启动失败: %v", err)
 	}
 
+	// // 初始化依赖
+	//
+	// // 创建调度器
+	// scheduler := scheduler.NewVMScheduler()
+	//
+	// // 注册任务
+	// scheduler.RegisterTask(taskFunc)
+
 }

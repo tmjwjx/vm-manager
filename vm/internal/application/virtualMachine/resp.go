@@ -23,3 +23,7 @@ type CreateResp struct {
 	Email  string `json:"email"`
 	IPAddr string `json:"ip_addr"`
 }
+
+type DestroyResp struct {
+	VMID string `json:"vm_id"`
+}
