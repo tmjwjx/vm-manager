@@ -86,5 +86,13 @@ func (V *VMServer) ProcessMessage(message []byte) {
 		}
 	case DestroyType:
 		// 删除虚拟机
+		rep := DestroyResp{}
+		_ = json.Unmarshal(data.Data, &rep)
+
+		err := V.vmRepo.DestroyVM(rep.VMID)
+		if err != nil {
+			log.Printf("删除虚拟机信息失败: %v", err)
+			return
+		}
 	}
 }

@@ -29,30 +29,39 @@ func main() {
 	// redis连接
 	rdb := inits.RedisInit()
 
+	// 基础设施层：
+
 	// 创建websocket连接指针
 	wsConn := websocket2.NewWebSocketClient()
 	vmRepo := mysql.NewVmRepo(db)
+
+	// 应用层：
 	pve := pveAppServices.NewPVEServer(wsConn, vmRepo)
 	vm := vmAppServices.NewVMServer(wsConn, vmRepo)
+
+	// 接口层：
 
 	// grpc服务
 	g := grpcInterface.NewGRPCServer(pve, vm)
 	// websocket服务
 	w := wsInterface.NewWSServer(pve, vm)
 
-	// 开启http服务(websocket)
+	// 开启http服务(websocket)：
 	go func() {
 		http.Handle("/", w)
 		_ = http.ListenAndServe(":8088", nil)
 	}()
 
-	// 开启gRPC服务
+	// 开启gRPC服务：
 	// 开启端口监听
 	listen, err := net.Listen("tcp", ":8888")
 	if err != nil {
 		log.Printf("监听失败: %v", err)
 	}
-	// 注册grpc服务
+
+	// 注册grpc服务：
+
+	// 拦截器：身份验证
 	jwt := middleware.JWTInterceptor(rdb)
 	grpcServer := grpc.NewServer(grpc.ChainUnaryInterceptor(jwt))
 	vmProto.RegisterVMManagerServer(grpcServer, g)
@@ -61,5 +70,13 @@ func main() {
 	if err != nil {
 		log.Printf("启动失败: %v", err)
 	}
+
+	// // 初始化依赖
+	//
+	// // 创建调度器
+	// scheduler := scheduler.NewVMScheduler()
+	//
+	// // 注册任务
+	// scheduler.RegisterTask(taskFunc)
 
 }

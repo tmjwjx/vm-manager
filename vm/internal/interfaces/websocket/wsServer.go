@@ -29,6 +29,7 @@ func (W WSServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 		return
 	}
+	// 调用 SetConn 保证grpc服务中的pve底层的conn链接与websocket服务中的conn链接一致
 	W.pveServer.SetConn(conn)
 
 	// 读取消息
@@ -40,7 +41,7 @@ func (W WSServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		log.Printf("收到消息: %s", message)
-		// 处理信息
+		// 处理信息（对数据库进行操作）
 		W.vmServer.ProcessMessage(message)
 	}
 }
