@@ -6,8 +6,9 @@ import (
 	"log"
 	"net"
 	"net/http"
-	pveAppServices "vm/internal/application/pve"
-	vmAppServices "vm/internal/application/virtualMachine"
+	pveApp "vm/internal/application/pve"
+	vmApp "vm/internal/application/virtualMachine"
+	etcd2 "vm/internal/infrastructure/etcd"
 	"vm/internal/infrastructure/inits"
 	"vm/internal/infrastructure/persistence/mysql"
 	websocket2 "vm/internal/infrastructure/websocket"
@@ -28,16 +29,19 @@ func main() {
 	inits.TableInit(db)
 	// redis连接
 	rdb := inits.RedisInit()
+	// etcd连接
+	etcd := inits.EtcdInit()
 
-	// 基础设施层：
+	// 基础设施层
 
 	// 创建websocket连接指针
 	wsConn := websocket2.NewWebSocketClient()
 	vmRepo := mysql.NewVmRepo(db)
+	etcdConn := etcd2.NewEtcdService(etcd)
 
 	// 应用层：
-	pve := pveAppServices.NewPVEServer(wsConn, vmRepo)
-	vm := vmAppServices.NewVMServer(wsConn, vmRepo)
+	pve := pveApp.NewPVEServer(wsConn, vmRepo, etcdConn)
+	vm := vmApp.NewVMServer(wsConn, vmRepo, etcdConn)
 
 	// 接口层：
 

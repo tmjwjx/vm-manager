@@ -6,7 +6,9 @@ type Data struct {
 }
 
 const (
-	CreateType  string = "create"
-	DestroyType string = "destroy"
-	StartType   string = "start"
+	CreateType    string = "create"
+	DestroyType   string = "destroy"
+	StartType     string = "start"
+	RebootType    string = "reboot"
+	GetVMInfoType string = "get_vm_info"
 )

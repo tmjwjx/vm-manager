@@ -65,8 +65,14 @@ func (G GRPCServer) RenewVM(ctx context.Context, req *vmProto.RenewVMReq) (*vmPr
 }
 
 func (G GRPCServer) GetVMInfo(ctx context.Context, req *vmProto.GetVMInfoReq) (*vmProto.GetVMInfoResp, error) {
-	//TODO implement me
-	panic("implement me")
+
+	info, err := G.pveServer.GetVMInfo(ctx, req)
+	if err != nil {
+		log.Printf("获取虚拟机信息失败: %v", err)
+		return nil, err
+	}
+	return info, nil
+
 }
 
 func (G GRPCServer) mustEmbedUnimplementedVMManagerServer() {

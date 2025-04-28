@@ -25,6 +25,10 @@ func (W *WebsocketClient) ProcessMessage(mes []byte) {
 	case globals.DestroyType:
 	case globals.StartType:
 		controller.StartVM(W.conn, data.Data)
+	case globals.RebootType:
+		controller.RebootVM(W.conn, data.Data)
+	case globals.GetVMInfoType:
+		controller.GetVMInfo(W.conn, data.Data)
 
 	}
 }

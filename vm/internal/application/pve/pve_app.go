@@ -9,6 +9,7 @@ import (
 	"log"
 	pveDomainServices "vm/internal/domain/pve/services"
 	"vm/internal/domain/virtualMachine/repo"
+	etcd2 "vm/internal/infrastructure/etcd"
 	"vm/internal/infrastructure/utils"
 )
 
@@ -21,7 +22,6 @@ type IPVEServer interface {
 	DestroyVM(ctx context.Context, req *vmProto.DestroyVMReq) (*vmProto.DestroyVMResp, error)
 	StartVM(ctx context.Context, req *vmProto.StartVMReq) (*vmProto.StartVMResp, error)
 	StopVM(ctx context.Context, req *vmProto.StopVMReq) (*vmProto.StopVMResp, error)
-	RenewVM(ctx context.Context, req *vmProto.RenewVMReq) (*vmProto.RenewVMResp, error)
 	GetVMInfo(ctx context.Context, req *vmProto.GetVMInfoReq) (*vmProto.GetVMInfoResp, error)
 	SetConn(conn *websocket.Conn)
 	ReceiveMessage() ([]byte, error)
@@ -30,12 +30,17 @@ type IPVEServer interface {
 var _ IPVEServer = &PVEServer{}
 
 type PVEServer struct {
-	pveService pveDomainServices.IPVEService
-	vmRepo     repo.IVirtualMachineRepository
+	pveService  pveDomainServices.IPVEService
+	vmRepo      repo.IVirtualMachineRepository
+	etcdService etcd2.IEtcdService
 }
 
-func NewPVEServer(pveService pveDomainServices.IPVEService, vmService repo.IVirtualMachineRepository) *PVEServer {
-	return &PVEServer{pveService: pveService, vmRepo: vmService}
+func (P PVEServer) GetEtcd(key string) (string, error) {
+	return P.etcdService.GetEtcd(key)
+}
+
+func NewPVEServer(pveService pveDomainServices.IPVEService, vmRepo repo.IVirtualMachineRepository, etcdService etcd2.IEtcdService) *PVEServer {
+	return &PVEServer{pveService: pveService, vmRepo: vmRepo, etcdService: etcdService}
 }
 
 func (P PVEServer) ReceiveMessage() ([]byte, error) {
@@ -156,12 +161,45 @@ func (P PVEServer) StopVM(ctx context.Context, req *vmProto.StopVMReq) (*vmProto
 	panic("implement me")
 }
 
-func (P PVEServer) RenewVM(ctx context.Context, req *vmProto.RenewVMReq) (*vmProto.RenewVMResp, error) {
-	//TODO implement me
-	panic("implement me")
-}
+func (P PVEServer) GetVMInfo(ctx context.Context, req *vmProto.GetVMInfoReq) (resp *vmProto.GetVMInfoResp, err error) {
+	resp = &vmProto.GetVMInfoResp{}
 
-func (P PVEServer) GetVMInfo(ctx context.Context, req *vmProto.GetVMInfoReq) (*vmProto.GetVMInfoResp, error) {
-	//TODO implement me
-	panic("implement me")
+	// 获取vmId
+	email := ctx.Value("email").(string)
+	vm, err := P.vmRepo.GetVMInfoByEmail(email)
+	if err != nil {
+		return nil, err
+	}
+
+	// 构建请求消息
+	vmInfoReq := &VMInfoVMReq{
+		VMID: vm.VMID,
+	}
+	// 序列化请求消息
+	b, err := json.Marshal(vmInfoReq)
+	if err != nil {
+		log.Printf("json 序列化失败: %v", err)
+		return nil, err
+	}
+	// 封装请求消息
+	data := Data{
+		Type: GetInfoType,
+		Data: b,
+	}
+	// 再次序列化
+	b, err = json.Marshal(data)
+	if err != nil {
+		log.Printf("json 序列化失败: %v", err)
+		return nil, err
+	}
+
+	// 发送websocket消息
+	err = P.pveService.SendMessage(b)
+	if err != nil {
+		return nil, err
+	}
+
+	resp.Result = true
+
+	return resp, nil
 }

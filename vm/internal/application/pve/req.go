@@ -25,3 +25,7 @@ type CreateVMReq struct {
 type StartVMReq struct {
 	VMID string `json:"vm_id"`
 }
+
+type VMInfoVMReq struct {
+	VMID string `json:"vm_id"`
+}

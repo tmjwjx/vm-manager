@@ -7,3 +7,11 @@ type CreateReq struct {
 type StartReq struct {
 	VMID string `json:"vm_id"`
 }
+
+type RebootReq struct {
+	VMID string `json:"vm_id"`
+}
+
+type GetVMInfoReq struct {
+	VMID string `json:"vm_id"`
+}

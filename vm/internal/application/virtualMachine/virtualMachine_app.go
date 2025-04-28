@@ -10,6 +10,7 @@ import (
 	"vm/internal/domain/pve/services"
 	"vm/internal/domain/virtualMachine/entity"
 	"vm/internal/domain/virtualMachine/repo"
+	etcd2 "vm/internal/infrastructure/etcd"
 )
 
 /*
@@ -24,12 +25,13 @@ type IVMServer interface {
 var _ IVMServer = (*VMServer)(nil)
 
 type VMServer struct {
-	pveService services.IPVEService
-	vmRepo     repo.IVirtualMachineRepository
+	pveService  services.IPVEService
+	vmRepo      repo.IVirtualMachineRepository
+	etcdService etcd2.IEtcdService
 }
 
-func NewVMServer(pveService services.IPVEService, vmRepo repo.IVirtualMachineRepository) *VMServer {
-	return &VMServer{pveService: pveService, vmRepo: vmRepo}
+func NewVMServer(pveService services.IPVEService, vmRepo repo.IVirtualMachineRepository, etcdService etcd2.IEtcdService) *VMServer {
+	return &VMServer{pveService: pveService, vmRepo: vmRepo, etcdService: etcdService}
 }
 
 func (V *VMServer) RenewVM(ctx context.Context, req *vmProto.RenewVMReq) (resp *vmProto.RenewVMResp, err error) {
