@@ -1,3 +1,8 @@
 /vm/internal/infrastructure/config/local.yaml
 /vm/logs/
 /.DS_Store
+dev.yaml
+product.yaml
+*.log
+.DS_Store
+.idea/
